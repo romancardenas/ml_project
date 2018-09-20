@@ -1,8 +1,6 @@
-import numpy as np
 import pandas as pd
 from matplotlib.pyplot import *
 from src.modify_data import *
-
 
 
 def read_data(data_path, omit_columns=None):
@@ -10,11 +8,23 @@ def read_data(data_path, omit_columns=None):
 
     Keyword arguments:
     -- data_path: path to the csv file
-    -- omit_columns: list of columns you want to drop from dataset (default None)"""
+    -- omit_columns: list of columns you want to drop from dataset (default None)
+
+    Returns:
+    -- attributeNames: List with the name of each attribute
+    -- X: houses data
+    -- y: houses price"""
+
     data = pd.read_csv(data_path)
     if omit_columns:
         data = data.drop(columns=omit_columns)
-    return data
+
+    # Extract class names to python list, then encode with integers (dict)
+    attributeNames = list(data.columns.values)
+    data = data.values
+    X = data[:, 1:]
+    y = data[:, 0]
+    return X, y, attributeNames
 
 
 def divide_data(data, train_size=0.75):
@@ -23,10 +33,10 @@ def divide_data(data, train_size=0.75):
         Keyword arguments:
         -- data: original dataframe
         -- train_size: percentage of observations you want in the training dataset (dafault 0.75)"""
-    N, M = data.shape
+    N = data.shape[0]
     threshold = int(N * train_size)
-    data_train = data.iloc[0:threshold]
-    data_test = data.iloc[threshold:]
+    data_train = data[:threshold]
+    data_test = data[threshold:]
     return data_train, data_test
 
 
@@ -34,18 +44,23 @@ if __name__ == '__main__':
     data_path = '../data/kc_house_data.csv'
     options = {
         'omit_columns': ['id', 'date', 'sqft_living', 'view', 'sqft_lot', 'grade', 'lat', 'long'],
+        'binary_columns': ['sqft_basement'],
+        'one_to_k': [],
         'train_size': 0.75,
         'test_size': 0.25
     }
-    data = read_data(data_path, omit_columns=options['omit_columns'])
-    data_train, data_test = divide_data(data)
-    print(data['sqft_basement'])
-    print(to_binary(data, ['sqft_basement'])['sqft_basement'])
-    print(data['sqft_basement'])
+
+    X, y, attributeNames = read_data(data_path, omit_columns=options['omit_columns'])
+
+    binary = [attributeNames.index(x) - 1 for x in options['binary_columns'] if x in attributeNames]
+    X = to_binary(X, binary)
+
+    X, X_mean, X_std = normalize(X)
+    print(X.mean(axis=0))
+    print(X.std(axis=0))
+
+    X_train, X_test = divide_data(X, options['train_size'])
+    y_train, y_test = divide_data(y, options['train_size'])
 
 
-    print(data.describe())
-    print(data.columns)
-    print(data.size)
-    print(data_train.size)
-    print(data_test.size)
+
