@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 from matplotlib.pyplot import *
+from src.modify_data import *
+
 
 
 def read_data(data_path, omit_columns=None):
@@ -31,12 +33,18 @@ def divide_data(data, train_size=0.75):
 if __name__ == '__main__':
     data_path = '../data/kc_house_data.csv'
     options = {
-        'omit_columns': ['id', 'date'],
+        'omit_columns': ['id', 'date', 'sqft_living', 'view', 'sqft_lot', 'grade', 'lat', 'long'],
         'train_size': 0.75,
         'test_size': 0.25
     }
-    data = read_data(data_path, omit_columns=['id', 'date'])
+    data = read_data(data_path, omit_columns=options['omit_columns'])
     data_train, data_test = divide_data(data)
+    print(data['sqft_basement'])
+    print(to_binary(data, ['sqft_basement'])['sqft_basement'])
+    print(data['sqft_basement'])
+
+
+    print(data.describe())
     print(data.columns)
     print(data.size)
     print(data_train.size)
