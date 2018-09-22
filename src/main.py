@@ -5,7 +5,7 @@ from src.modify_data import *
 data_path = '../data/kc_house_data.csv'
 options = {
     'omit_columns': ['id', 'date', 'sqft_living', 'view', 'sqft_lot', 'grade', 'lat', 'long'],
-    'binary_columns': [('sqft_basement', 'basement')],
+    'binary_columns': {'sqft_basement': 'basement'},
     'one_to_k': [],
     'date_to_month': [],
     'no_normalized_columns': ['price'],

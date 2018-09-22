@@ -3,16 +3,20 @@ def to_binary(data, columns):
 
         Keyword arguments:
         -- data: dataframe
-        -- columns: tuple with dataframe column names to be binarized and new column names for each one
+        -- columns: dictionary with dataframe column names to be binarized and new column names for each one
 
         Returns:
         -- out_data: copy of original dataframe with binarized columns"""
-    original_columns = [item[0] for item in columns]
-    new_columns = [item[1] for item in columns]
+    original_columns = list(columns.keys())
+    new_columns = list(columns.values())
+    #original_columns = [item[0] for item in columns]
+    #new_columns = [item[1] for item in columns]
 
     out_data = data.copy()
-    out_data[new_columns] = (data[original_columns] != 0).astype(int)
-    out_data = out_data.drop(original_columns, 1)
+    out_data[original_columns] = (data[original_columns] != 0).astype(int)
+    out_data = out_data.rename(columns=columns)
+    #out_data = out_data.drop(original_columns, 1)
+    print(out_data)
     print(out_data.columns)
 
     return out_data
@@ -27,7 +31,7 @@ def one_to_K(data, columns):  # TODO
 
             Returns:
             -- out_data: copy of original dataframe with 1-out-of-K columns"""
-    pass
+    return data.copy()
 
 
 def date_to_month(data, columns):  # TODO
@@ -39,7 +43,7 @@ def date_to_month(data, columns):  # TODO
 
                 Returns:
                 -- out_data: copy of original dataframe with months instead of dates"""
-    pass
+    return data.copy()
 
 
 def normalize(data, omit_columns=None):
