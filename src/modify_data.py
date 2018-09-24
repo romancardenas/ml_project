@@ -1,3 +1,6 @@
+import re
+
+
 def to_binary(data, columns):
     """Returns a copy of a dataframe with binarized columns.
 
@@ -8,14 +11,10 @@ def to_binary(data, columns):
         Returns:
         -- out_data: copy of original dataframe with binarized columns"""
     original_columns = list(columns.keys())
-    new_columns = list(columns.values())
-    #original_columns = [item[0] for item in columns]
-    #new_columns = [item[1] for item in columns]
 
     out_data = data.copy()
     out_data[original_columns] = (data[original_columns] != 0).astype(int)
     out_data = out_data.rename(columns=columns)
-    #out_data = out_data.drop(original_columns, 1)
     print(out_data)
     print(out_data.columns)
 
@@ -43,7 +42,15 @@ def date_to_month(data, columns):  # TODO
 
                 Returns:
                 -- out_data: copy of original dataframe with months instead of dates"""
-    return data.copy()
+    original_columns = list(columns.keys())
+    out_data = data.copy()
+    for column in original_columns:
+        c_list = out_data[column].tolist()
+        new_column = [int(re.findall("^[0-9]{4}([0-9]{2})[0-9]{2}T[0-9]{6}$", a)[0]) for a in c_list]
+        out_data[column] = new_column
+        print(out_data[column])
+    out_data = out_data.rename(columns=columns)
+    return out_data
 
 
 def normalize(data, omit_columns=None):
@@ -63,7 +70,7 @@ def normalize(data, omit_columns=None):
                 This aspect simplifies the data reconstruction process."""
     out_data = data.copy()
     out_data_mean = out_data.mean()
-    out_data_std = out_data.max() - out_data.min()
+    out_data_std = out_data.max() - out_data.min()  # TODO is it better the standard deviation?
     if omit_columns is not None:
         for i in data.columns:
             if i in omit_columns:
