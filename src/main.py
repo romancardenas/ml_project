@@ -1,5 +1,7 @@
 from src.read_data import *
 from src.modify_data import *
+import numpy as np
+
 
 
 data_path = '../data/kc_house_data.csv'
@@ -17,7 +19,7 @@ options = {
     'date_to_month': {'date': 'month'},
     'one_to_k': ['zipcode',
                  'month'],  # The month, once extracted from date, will also turn to 1-out-of-K column
-    'no_normalized_columns': ['price', 'zipcode', 'month', 'basement', 'renovated'],
+    'no_normalized_columns': ['price', 'zipcode', 'month', 'basement', 'renovated','waterfront'],
     'train_size': 0.75,
 }
 
@@ -41,6 +43,7 @@ data = one_to_K(data, options['one_to_k'])
 
 # Divide data between train and test
 data_train, data_test = divide_data(data, options['train_size'])
+
 
 # Convert pandas dataframe to NumPy ndarray (compatibility with examples code)
 attributeNames = list(data.columns.values)

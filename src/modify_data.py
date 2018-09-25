@@ -28,7 +28,6 @@ def one_to_K(data, columns):
             Keyword arguments:
             -- data: dataframe
             -- columns: dataframe column names to be modified to 1-out-of-K columns
-            -- names: new prefixes for the column names
             Returns:
             -- out_data: copy of original dataframe with 1-out-of-K columns"""
             
