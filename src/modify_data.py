@@ -22,7 +22,7 @@ def to_binary(data, columns):
     return out_data
 
 
-def one_to_K(data, columns):  # TODO
+def one_to_K(data, columns):
     """Returns a copy of a dataframe with 1-out-of-K new columns.
 
             Keyword arguments:
@@ -35,14 +35,14 @@ def one_to_K(data, columns):  # TODO
     out_data = data.copy()
     for column in columns:
         out_data[column] = pd.Categorical(out_data[column])
-        dataDummies = pd.get_dummies(out_data[column], prefix = column)
+        dataDummies = pd.get_dummies(out_data[column], prefix=column)
         out_data = pd.concat([out_data, dataDummies], axis=1)
         out_data = out_data.drop(column, axis=1)
         
     return out_data
 
 
-def date_to_month(data, columns):  # TODO
+def date_to_month(data, columns):
     """Returns a copy of a dataframe with date columns modified to months.
 
                 Keyword arguments:

@@ -30,16 +30,14 @@ data = to_binary(data, options['binary_columns'])
 # Transform date columns to month
 data = date_to_month(data, options['date_to_month'])
 
+# Normalize columns
+# TODO If normalization has to be done to train data, first we have to binarize and do the 1-out-of-K to all the data set
+# TODO Then, divide in train and test
+# TODO then normalize ONLY train data set, quiting the binaries
 data, data_mean, data_std = normalize(data, omit_columns=options['no_normalized_columns'])
-
 
 # Transform 1-to-K columns
 data = one_to_K(data, options['one_to_k'])
-
-# Normalize columns
-# TODO Maybe the normalization must be done only with the train set
-# TODO Do we have to normalize also binaries?
-#data, data_mean, data_std = normalize(data, omit_columns=options['no_normalized_columns', 'binary_columns', 'one_to_k'])
 
 # Divide data between train and test
 data_train, data_test = divide_data(data, options['train_size'])
@@ -48,3 +46,5 @@ data_train, data_test = divide_data(data, options['train_size'])
 attributeNames = list(data.columns.values)
 y = data_train.values[:, :1]
 X = data_train.values[:, 1:]
+
+
