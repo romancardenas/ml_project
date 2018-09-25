@@ -47,6 +47,7 @@ data_train, data_test = divide_data(data, options['train_size'])
 
 # Convert pandas dataframe to NumPy ndarray (compatibility with examples code)
 attributeNames = list(data.columns.values)
+attributeNames.remove('price')
 y = data_train.values[:, :1]
 X = data_train.values[:, 1:]
 
