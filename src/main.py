@@ -34,7 +34,7 @@ data, data_mean, data_std = normalize(data, omit_columns=options['no_normalized_
 
 
 # Transform 1-to-K columns
-data = one_to_K(data, options['one_to_k'], options['one_to_k'])
+data = one_to_K(data, options['one_to_k'])
 
 # Normalize columns
 # TODO Maybe the normalization must be done only with the train set

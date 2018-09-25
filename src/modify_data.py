@@ -22,7 +22,7 @@ def to_binary(data, columns):
     return out_data
 
 
-def one_to_K(data, columns, names):  # TODO
+def one_to_K(data, columns):  # TODO
     """Returns a copy of a dataframe with 1-out-of-K new columns.
 
             Keyword arguments:
@@ -33,11 +33,11 @@ def one_to_K(data, columns, names):  # TODO
             -- out_data: copy of original dataframe with 1-out-of-K columns"""
             
     out_data = data.copy()
-    for x in range(len(columns)):
-        out_data[columns[x]] = pd.Categorical(out_data[columns[x]])
-        dataDummies = pd.get_dummies(out_data[columns[x]], prefix = names[x])
+    for column in columns:
+        out_data[column] = pd.Categorical(out_data[column])
+        dataDummies = pd.get_dummies(out_data[column], prefix = column)
         out_data = pd.concat([out_data, dataDummies], axis=1)
-        out_data = out_data.drop(columns[x], axis=1)
+        out_data = out_data.drop(column, axis=1)
         
     return out_data
 
