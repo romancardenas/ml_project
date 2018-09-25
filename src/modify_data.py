@@ -32,14 +32,14 @@ def one_to_K(data, columns, names):  # TODO
             Returns:
             -- out_data: copy of original dataframe with 1-out-of-K columns"""
             
-    
+    out_data = data.copy()
     for x in range(len(columns)):
-        data[columns[x]] = pd.Categorical(data[columns[x]])
-        dataDummies = pd.get_dummies(data[columns[x]], prefix = names[x])
-        data = pd.concat([data, dataDummies], axis=1)
-        data.drop(columns[x], axis =1)
+        out_data[columns[x]] = pd.Categorical(out_data[columns[x]])
+        dataDummies = pd.get_dummies(out_data[columns[x]], prefix = names[x])
+        out_data = pd.concat([out_data, dataDummies], axis=1)
+        out_data = out_data.drop(columns[x], axis=1)
         
-    return data.copy()
+    return out_data
 
 
 def date_to_month(data, columns):  # TODO
