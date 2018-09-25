@@ -16,8 +16,6 @@ options = {
                        'yr_renovated': 'renovated'},
     'date_to_month': {'date': 'month'},
     'one_to_k': ['zipcode',
-                 'date',
-                 'condition',
                  'month'],  # The month, once extracted from date, will also turn to 1-out-of-K column
     'no_normalized_columns': ['price'],
     'train_size': 0.75,
@@ -33,7 +31,7 @@ data = to_binary(data, options['binary_columns'])
 data = date_to_month(data, options['date_to_month'])
 
 # Transform 1-to-K columns
-data = one_to_K(data, options['one_to_k'])
+data = one_to_K(data, options['one_to_k'], options['one_to_k'])
 
 # Normalize columns
 # TODO Maybe the normalization must be done only with the train set

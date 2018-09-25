@@ -28,3 +28,5 @@ def divide_data(data, train_size=0.75):
     data_train = data.loc[:threshold]
     data_test = data.loc[threshold:]
     return data_train, data_test
+
+

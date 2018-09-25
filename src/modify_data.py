@@ -1,4 +1,5 @@
 import re
+import pandas as pd
 
 
 def to_binary(data, columns):
@@ -21,15 +22,23 @@ def to_binary(data, columns):
     return out_data
 
 
-def one_to_K(data, columns):  # TODO
+def one_to_K(data, columns, names):  # TODO
     """Returns a copy of a dataframe with 1-out-of-K new columns.
 
             Keyword arguments:
             -- data: dataframe
             -- columns: dataframe column names to be modified to 1-out-of-K columns
-
+            -- names: new prefixes for the column names
             Returns:
             -- out_data: copy of original dataframe with 1-out-of-K columns"""
+            
+    
+    for x in range(len(columns)):
+        data[columns[x]] = pd.Categorical(data[columns[x]])
+        dataDummies = pd.get_dummies(data[columns[x]], prefix = names[x])
+        data = pd.concat([data, dataDummies], axis=1)
+        data.drop(columns[x], axis =1)
+        
     return data.copy()
 
 
