@@ -12,14 +12,18 @@ options = {
                      'sqft_lot',
                      'grade',
                      'lat',
+                     'date',
                      'long',
-                     'sqft_above'],
-    'binary_columns': {'sqft_basement': 'basement',
-                       'yr_renovated': 'renovated'},
-    'date_to_month': {'date': 'month'},
-    'one_to_k': ['zipcode',
-                 'month'],  # The month, once extracted from date, will also turn to 1-out-of-K column
-    'no_normalized_columns': ['price', 'zipcode', 'month', 'basement', 'renovated','waterfront'],
+                     'sqft_above',
+                     'condition',
+                     'sqft_basement',
+                     'yr_renovated',
+                     'waterfront',
+                     'zipcode'],
+    'binary_columns': {},
+    'date_to_month': {},
+    'one_to_k': [],  # The month, once extracted from date, will also turn to 1-out-of-K column
+    'no_normalized_columns': ['price', 'zipcode', 'basement', 'renovated', 'waterfront'],
     'train_size': 0.75,
 }
 
@@ -48,7 +52,8 @@ data_train, data_test = divide_data(data, options['train_size'])
 # Convert pandas dataframe to NumPy ndarray (compatibility with examples code)
 attributeNames = list(data.columns.values)
 attributeNames.remove('price')
-y = data_train.values[:, :1]
+y = data_train.values[:, 0]
+print(y.shape)
 X = data_train.values[:, 1:]
 
 
