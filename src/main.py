@@ -1,22 +1,15 @@
+import matplotlib.pyplot as plt
 from src.read_data import *
 from src.modify_data import *
-import numpy as np
-
 
 
 data_path = '../data/kc_house_data.csv'
 options = {
     'omit_columns': ['id',
-                     'sqft_living',
                      'view',
-                     'sqft_lot',
-                     'grade',
                      'lat',
                      'date',
                      'long',
-                     'sqft_above',
-                     'condition',
-                     'sqft_basement',
                      'yr_renovated',
                      'waterfront',
                      'zipcode'],
@@ -29,6 +22,15 @@ options = {
 
 # Get data from file
 data = read_data(data_path, omit_columns=options['omit_columns'])
+
+# Print all the attributes against each other
+print(list(data))
+for i in list(data):
+    plt.figure()
+    plt.scatter(data[i], data.price)
+    plt.title("{} against price".format(i))
+    plt.show()
+
 
 # Transform binary columns
 data = to_binary(data, options['binary_columns'])
@@ -55,5 +57,3 @@ attributeNames.remove('price')
 y = data_train.values[:, 0]
 print(y.shape)
 X = data_train.values[:, 1:]
-
-

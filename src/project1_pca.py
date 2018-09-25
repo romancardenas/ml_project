@@ -1,17 +1,15 @@
-# exercise 2.1.3
-# (requires data structures from ex. 2.2.1)
 from src.main import *
-
 from matplotlib.pyplot import figure, plot, title, xlabel, ylabel, show
+from mpl_toolkits.mplot3d import Axes3D
 from scipy.linalg import svd
 
 N = len(y)
 
 # Subtract mean value from data
-# Y = X - np.ones((N, 1))*X.mean(axis=0)
+Y = X - X.mean(axis=0)
 
 # PCA by computing SVD of Y
-U,S,V = svd(X, full_matrices=False)
+U, S, V = svd(X, full_matrices=False)
 V = V.T
 
 # Compute variance explained by principal components
@@ -51,13 +49,17 @@ print(attr_sorted_by_value)
 
 # Project data onto principal component space
 Y = X - X.mean(axis=0)
-Z = X @ V
+Z = Y @ V
 
 n = [(0, 250000), (250000, 350000), (350000, 500000), (500000, 700000)]
 
 # Plot PCA of the data
-f = figure()
-title('pixel vectors of handwr. digits projected on PCs')
+fig = figure()
+ax = fig.gca(projection='3d')
+ax.plot_trisurf(Z[:, 0], Z[:, 1], y)
+show()
+
+figure()
 for c in n:
     # select indices belonging to class c:
     class_mask1 = (y >= c[0])
@@ -66,10 +68,7 @@ for c in n:
     print(type(class_mask))
     print(type(Z))
     plot(Z[class_mask, 0], Z[class_mask, 1], '.')
+show()
 xlabel('PC1')
 ylabel('PC2')
-show()
 
-
-figure()
-plot(X)
