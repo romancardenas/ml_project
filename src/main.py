@@ -16,12 +16,11 @@ options = {
                      'yr_built',
                      'grade',
                      'sqft_living15',
-                     'sqft_lot15',
-                     'zipcode'],
+                     'sqft_lot15'],
     'binary_columns': {},
     'date_to_month': {},
-    'one_to_k': [],  # The month, once extracted from date, will also turn to 1-out-of-K column
-    'no_normalized_columns': ['price'],
+    'one_to_k': ['zipcode'],  # The month, once extracted from date, will also turn to 1-out-of-K column
+    'no_normalized_columns': ['price', 'zipcode'],
     'train_size': 0.75,
 }
 

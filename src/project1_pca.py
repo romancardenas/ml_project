@@ -24,18 +24,19 @@ print('With {0:d} PCAs you have {1:.2f}% of the information'.format(pca_index_90
 
 # Plot variance explained
 fig = figure()
-ax1 = fig.add_subplot(211)
+ax1 = fig.add_subplot(111)
 ax1.plot(range(1, len(rho)+1), rho, 'o-')
-ax1.set_title('Variance explained by principal components')
-ax1.set_xlabel('Principal component')
-ax1.set_ylabel('Variance explained')
+ax1.set_title('Variance Explained by Principal Components', fontsize = 20)
+ax1.set_xlabel('Principal components', fontsize = 12)
+ax1.set_ylabel('Variance explained', fontsize = 12)
 
-ax2 = fig.add_subplot(212)
+fig2 = figure()
+ax2 = fig2.add_subplot(111)
 ax2.plot(range(1, len(cum_rho)+1), cum_rho, 'o-')
 ax2.axhline(y=0.9, color='r', linestyle='--')
-ax2.set_title('Cumulative variance explained by principal components')
-ax2.set_xlabel('Principal component')
-ax2.set_ylabel('Cumulative variance explained')
+ax2.set_title('Cumulative Variance Explained by Principal Components', fontsize = 20)
+ax2.set_xlabel('Principal component', fontsize = 12)
+ax2.set_ylabel('Cumulative variance explained', fontsize = 12)
 show()
 
 
@@ -60,7 +61,7 @@ ax.plot_trisurf(Z[:, 0], Z[:, 1], y)
 show()
 
 figure()
-title("price ranges represented by the first two PCs", fontsize = 20)
+title("Price Ranges Represented by the First two PCs", fontsize = 25)
 for c in n:
     # select indices belonging to class c:
     class_mask1 = (y >= c[0])
@@ -68,8 +69,8 @@ for c in n:
     class_mask = (class_mask1 & class_mask2)
     plot(Z[class_mask, 0], Z[class_mask, 1], '.')
 legend(classNames)
-xlabel('PC1')
-ylabel('PC2')
+xlabel('PC1', fontsize = 15)
+ylabel('PC2', fontsize = 15)
 show()
 
 
