@@ -26,17 +26,17 @@ print('With {0:d} PCAs you have {1:.2f}% of the information'.format(pca_index_90
 fig = figure()
 ax1 = fig.add_subplot(111)
 ax1.plot(range(1, len(rho)+1), rho, 'o-')
-ax1.set_title('Variance Explained by Principal Components', fontsize = 20)
-ax1.set_xlabel('Principal components', fontsize = 12)
-ax1.set_ylabel('Variance explained', fontsize = 12)
+ax1.set_title('Variance Explained by Principal Components', fontsize = 25)
+ax1.set_xlabel('Principal components', fontsize = 15)
+ax1.set_ylabel('Variance explained', fontsize = 15)
 
 fig2 = figure()
 ax2 = fig2.add_subplot(111)
 ax2.plot(range(1, len(cum_rho)+1), cum_rho, 'o-')
 ax2.axhline(y=0.9, color='r', linestyle='--')
-ax2.set_title('Cumulative Variance Explained by Principal Components', fontsize = 20)
-ax2.set_xlabel('Principal component', fontsize = 12)
-ax2.set_ylabel('Cumulative variance explained', fontsize = 12)
+ax2.set_title('Cumulative Variance Explained by Principal Components', fontsize = 25)
+ax2.set_xlabel('Principal component', fontsize = 15)
+ax2.set_ylabel('Cumulative variance explained', fontsize = 15)
 show()
 
 
