@@ -40,13 +40,13 @@ ax2.set_ylabel('Cumulative variance explained', fontsize = 15)
 show()
 
 
-list1, list2 = zip(*sorted(zip(attributeNames, V[:, 1]), key=lambda x: x[1]))
-attr_sorted_by_value = dict(zip(list1,  list2))
-print(attr_sorted_by_value)
+list1, list2 = zip(*sorted(zip(attributeNames, V[:, 0]), key=lambda x: abs(x[1])))
+attributes_sorted_by_abs_value = dict(zip(list1,  list2))
+print(attributes_sorted_by_abs_value)
 
-list1, list2 = zip(*sorted(zip(attributeNames, V[:, 2]), key=lambda x: x[1]))
-attr_sorted_by_value = dict(zip(list1,  list2))
-print(attr_sorted_by_value)
+list1, list2 = zip(*sorted(zip(attributeNames, V[:, 1]), key=lambda x: abs(x[1])))
+attributes_sorted_by_abs_value = dict(zip(list1,  list2))
+print(attributes_sorted_by_abs_value)
 
 # Project data onto principal component space
 Z = Y @ V
@@ -69,8 +69,8 @@ for c in n:
     class_mask = (class_mask1 & class_mask2)
     plot(Z[class_mask, 0], Z[class_mask, 1], '.')
 legend(classNames)
-xlabel('PC1', fontsize = 15)
-ylabel('PC2', fontsize = 15)
+xlabel('PC1', fontsize=15)
+ylabel('PC2', fontsize=15)
 show()
 
 
