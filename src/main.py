@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 from src.read_data import *
 from src.modify_data import *
+import seaborn as sns
 
 
 data_path = '../data/kc_house_data.csv'
@@ -11,8 +12,7 @@ options = {
                      'date',
                      'long',
                      'yr_renovated',
-                     'waterfront',
-                     'zipcode'],
+                     'waterfront'],
     'binary_columns': {},
     'date_to_month': {},
     'one_to_k': [],  # The month, once extracted from date, will also turn to 1-out-of-K column
@@ -23,14 +23,26 @@ options = {
 # Get data from file
 data = read_data(data_path, omit_columns=options['omit_columns'])
 
-# Print all the attributes against each other
-print(list(data))
-for i in list(data):
-    plt.figure()
-    plt.scatter(data[i], data.price)
-    plt.title("{} against price".format(i))
-    plt.show()
+a = sns.xkcd_palette(['green', 'pinkish purple', 'blue', 'purplish', 'grape purple', 'deep purple'])
+sns.set_palette(a)
 
+# Print all the attributes against each other
+#print(list(data))
+#for i in list(data):
+#    plt.figure()
+#    plt.scatter(data[i], data.price, marker=".",)
+#    plt.title("{} against price".format(i))
+#    plt.ylabel("Price (USD)")
+#    plt.xlabel("{}".format(i))
+#    sns.despine()
+
+plt.figure()
+plt.scatter(data.bathrooms, data.price, marker=".", c = 'black')
+sns.regplot(data.bathrooms, data.price, order=1, scatter=False, label='regression line')
+plt.title("Bathrooms against Price", fontsize = 25)
+plt.ylabel("Price (USD)", fontsize = 15)
+plt.xlabel("Total Bathrooms", fontsize = 15)
+sns.despine()
 
 # Transform binary columns
 data = to_binary(data, options['binary_columns'])
