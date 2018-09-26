@@ -38,16 +38,12 @@ sns.set_palette(a)
 
 plt.figure()
 
-plt.scatter(data.floors, data.price, marker=".", c = 'black')
+plt.scatter(data.yr_built, data.price, marker=".", c = 'black')
 #sns.regplot(data.floors, data.price, order=1, scatter=False, label='regression line')
-plt.title("Total Floors against Price", fontsize = 25)
+plt.title("Year Built against Price", fontsize = 25)
 plt.ylabel("Price (USD)", fontsize = 15)
-plt.xlabel("Floors", fontsize = 15)
-plt.scatter(data.bathrooms, data.price, marker=".", c = 'black')
-sns.regplot(data.bathrooms, data.price, order=1, scatter=False, label='regression line')
-plt.title("Bathrooms against Price", fontsize = 25)
-plt.ylabel("Price (USD)", fontsize = 15)
-plt.xlabel("Total Bathrooms", fontsize = 15)
+plt.xlabel("Year Built", fontsize = 15)
+plt.scatter(data.yr_built, data.price, marker=".", c = 'black')
 sns.despine()
 
 # Transform binary columns
