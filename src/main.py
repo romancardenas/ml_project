@@ -12,11 +12,16 @@ options = {
                      'date',
                      'long',
                      'yr_renovated',
-                     'waterfront'],
+                     'waterfront',
+                     'yr_built',
+                     'grade',
+                     'sqft_living15',
+                     'sqft_lot15',
+                     'zipcode'],
     'binary_columns': {},
     'date_to_month': {},
     'one_to_k': [],  # The month, once extracted from date, will also turn to 1-out-of-K column
-    'no_normalized_columns': ['price', 'zipcode', 'basement', 'renovated', 'waterfront'],
+    'no_normalized_columns': ['price'],
     'train_size': 0.75,
 }
 
@@ -27,7 +32,7 @@ a = sns.xkcd_palette(['green', 'pinkish purple', 'blue', 'purplish', 'grape purp
 sns.set_palette(a)
 
 # Print all the attributes against each other
-#print(list(data))
+print(list(data))
 #for i in list(data):
 #    plt.figure()
 #    plt.scatter(data[i], data.price, marker=".",)
@@ -36,15 +41,15 @@ sns.set_palette(a)
 #    plt.xlabel("{}".format(i))
 #    sns.despine()
 
-plt.figure()
-
-plt.scatter(data.yr_built, data.price, marker=".", c = 'black')
-#sns.regplot(data.floors, data.price, order=1, scatter=False, label='regression line')
-plt.title("Year Built against Price", fontsize = 25)
-plt.ylabel("Price (USD)", fontsize = 15)
-plt.xlabel("Year Built", fontsize = 15)
-plt.scatter(data.yr_built, data.price, marker=".", c = 'black')
-sns.despine()
+# plt.figure()
+#
+# plt.scatter(data.yr_built, data.price, marker=".", c = 'black')
+# #sns.regplot(data.floors, data.price, order=1, scatter=False, label='regression line')
+# plt.title("Year Built against Price", fontsize = 25)
+# plt.ylabel("Price (USD)", fontsize = 15)
+# plt.xlabel("Year Built", fontsize = 15)
+# plt.scatter(data.yr_built, data.price, marker=".", c = 'black')
+# sns.despine()
 
 # Transform binary columns
 data = to_binary(data, options['binary_columns'])
@@ -69,5 +74,4 @@ data_train, data_test = divide_data(data, options['train_size'])
 attributeNames = list(data.columns.values)
 attributeNames.remove('price')
 y = data_train.values[:, 0]
-print(y.shape)
 X = data_train.values[:, 1:]

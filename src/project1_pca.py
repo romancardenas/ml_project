@@ -1,5 +1,5 @@
 from src.main import *
-from matplotlib.pyplot import figure, plot, title, xlabel, ylabel, show
+from matplotlib.pyplot import figure, plot, title, xlabel, ylabel, show, legend
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.linalg import svd
 
@@ -9,7 +9,7 @@ N = len(y)
 Y = X - X.mean(axis=0)
 
 # PCA by computing SVD of Y
-U, S, V = svd(X, full_matrices=False)
+U, S, V = svd(Y, full_matrices=False)
 V = V.T
 
 # Compute variance explained by principal components
@@ -48,10 +48,10 @@ attr_sorted_by_value = dict(zip(list1,  list2))
 print(attr_sorted_by_value)
 
 # Project data onto principal component space
-Y = X - X.mean(axis=0)
 Z = Y @ V
 
-n = [(0, 250000), (250000, 350000), (350000, 500000), (500000, 700000)]
+n = [(0, 350000), (350000, 700000), (700000, 1000000), (1000000, 10000000)]
+classNames = [str(i) for i in n]
 
 # Plot PCA of the data
 fig = figure()
@@ -60,15 +60,16 @@ ax.plot_trisurf(Z[:, 0], Z[:, 1], y)
 show()
 
 figure()
+title("price ranges represented by the first two PCs", fontsize = 20)
 for c in n:
     # select indices belonging to class c:
     class_mask1 = (y >= c[0])
     class_mask2 = (y < c[1])
     class_mask = (class_mask1 & class_mask2)
-    print(type(class_mask))
-    print(type(Z))
     plot(Z[class_mask, 0], Z[class_mask, 1], '.')
-show()
+legend(classNames)
 xlabel('PC1')
 ylabel('PC2')
+show()
+
 
