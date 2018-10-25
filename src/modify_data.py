@@ -29,16 +29,16 @@ def one_to_K(data, columns):
             -- data: dataframe
             -- columns: dataframe column names to be modified to 1-out-of-K columns
             Returns:
-            -- out_data: copy of original dataframe with 1-out-of-K columns"""
-            
+            -- out_data: copy of original dataframe with 1-out-of-K columns
+            -- new_columns: list with names of new generated columns"""
     out_data = data.copy()
+    new_columns = list()
     for column in columns:
-        out_data[column] = pd.Categorical(out_data[column])
-        dataDummies = pd.get_dummies(out_data[column], prefix=column)
-        out_data = pd.concat([out_data, dataDummies], axis=1)
-        out_data = out_data.drop(column, axis=1)
-        
-    return out_data
+        data_dummies = pd.get_dummies(out_data[column], prefix=column)
+        new_columns.extend(list(data_dummies))
+        out_data = pd.concat([out_data, data_dummies], axis=1)  # add new generated columns
+        out_data = out_data.drop(column, axis=1)  # remove original column
+    return out_data, new_columns
 
 
 def date_to_month(data, columns):
@@ -79,6 +79,7 @@ def normalize(data, omit_columns=None):
     out_data = data.copy()
     out_data_mean = out_data.mean()
     out_data_std = out_data.max() - out_data.min()  # TODO is it better the standard deviation?
+    # out_data_std = out_data.std()
     if omit_columns is not None:
         for i in data.columns:
             if i in omit_columns:
@@ -86,3 +87,7 @@ def normalize(data, omit_columns=None):
                 out_data_std[i] = 1
     out_data = (out_data - out_data_mean) / out_data_std
     return out_data, out_data_mean, out_data_std
+
+
+def remove_outliers(data, target_columns=None):  # TODO function for eliminating the outliers of a given set of columns
+    pass

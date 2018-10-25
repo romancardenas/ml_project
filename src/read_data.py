@@ -30,3 +30,5 @@ def divide_data(data, train_size=0.75):
     return data_train, data_test
 
 
+def store_data():  # TODO define a function for storing a dataset into a CSV file
+    pass

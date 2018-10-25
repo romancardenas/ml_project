@@ -20,56 +20,45 @@ options = {
     'binary_columns': {},
     'date_to_month': {},
     'one_to_k': ['zipcode'],  # The month, once extracted from date, will also turn to 1-out-of-K column
-    'no_normalized_columns': ['price', 'zipcode'],
+    'non_normalized_columns': ['price'],
     'train_size': 0.75,
 }
+
+# TODO think about a more flexible script for indicating which cross-validation method we want to use
+
+# Plotting style stuff
+a = sns.xkcd_palette(['green', 'pinkish purple', 'blue', 'purplish', 'grape purple', 'deep purple'])
+sns.set_palette(a)
 
 # Get data from file
 data = read_data(data_path, omit_columns=options['omit_columns'])
 
-a = sns.xkcd_palette(['green', 'pinkish purple', 'blue', 'purplish', 'grape purple', 'deep purple'])
-sns.set_palette(a)
-
-# Print all the attributes against each other
-print(list(data))
-#for i in list(data):
-#    plt.figure()
-#    plt.scatter(data[i], data.price, marker=".",)
-#    plt.title("{} against price".format(i))
-#    plt.ylabel("Price (USD)")
-#    plt.xlabel("{}".format(i))
-#    sns.despine()
-
-# plt.figure()
-#
-# plt.scatter(data.yr_built, data.price, marker=".", c = 'black')
-# #sns.regplot(data.floors, data.price, order=1, scatter=False, label='regression line')
-# plt.title("Year Built against Price", fontsize = 25)
-# plt.ylabel("Price (USD)", fontsize = 15)
-# plt.xlabel("Year Built", fontsize = 15)
-# plt.scatter(data.yr_built, data.price, marker=".", c = 'black')
-# sns.despine()
-
 # Transform binary columns
 data = to_binary(data, options['binary_columns'])
 
-# Transform date columns to month
+# Transform date columns to months
 data = date_to_month(data, options['date_to_month'])
 
-# Normalize columns
-# TODO If normalization has to be done to train data, first we have to binarize and do the 1-out-of-K to all the data set
-# TODO Then, divide in train and test
-# TODO then normalize ONLY train data set, quiting the binaries
-data, data_mean, data_std = normalize(data, omit_columns=options['no_normalized_columns'])
-
 # Transform 1-to-K columns
-data = one_to_K(data, options['one_to_k'])
+data, new_columns_K = one_to_K(data, options['one_to_k'])
+
+# Normalize columns
+non_normalized = options['non_normalized_columns']
+non_normalized.extend(options['binary_columns'].values())  # Add binary columns to non-normalized columns
+non_normalized.extend(new_columns_K)  # Add one-out-of-K columns to non-normalized columns
+data, data_mean, data_std = normalize(data, omit_columns=non_normalized)
+
+# TODO removing outliers
+# TODO storing clean data to CSV files to avoid rerunning
 
 # Divide data between train and test
+# TODO this only accepts holdout cross-validation method, shoud we think about K-fold?
+# TODO If normalization has to be done to train data, first we have to divide in train and test
+# TODO then normalize ONLY train data set
 data_train, data_test = divide_data(data, options['train_size'])
 
-
 # Convert pandas dataframe to NumPy ndarray (compatibility with examples code)
+# TODO this was useful for project 1, maybe we have to change this for the second project
 attributeNames = list(data.columns.values)
 attributeNames.remove('price')
 y = data_train.values[:, 0]
