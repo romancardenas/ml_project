@@ -1,5 +1,6 @@
 import re
 import pandas as pd
+import numpy as np
 
 
 def to_binary(data, columns):
@@ -78,8 +79,7 @@ def normalize(data, omit_columns=None):
                 This aspect simplifies the data reconstruction process."""
     out_data = data.copy()
     out_data_mean = out_data.mean()
-    out_data_std = out_data.max() - out_data.min()  # TODO is it better the standard deviation?
-    # out_data_std = out_data.std()
+    out_data_std = out_data.std()
     if omit_columns is not None:
         for i in data.columns:
             if i in omit_columns:
@@ -89,5 +89,21 @@ def normalize(data, omit_columns=None):
     return out_data, out_data_mean, out_data_std
 
 
-def remove_outliers(data, target_columns=None):  # TODO function for eliminating the outliers of a given set of columns
-    pass
+def remove_outliers(data, target_columns=None, std=3):
+    """Returns a copy of a dataframe without outliers.
+
+                    Keyword arguments:
+                    -- data: dataframe
+                    -- target_columns: columns of the dataframe you want to remove the outliers from (default None)
+                    -- std: maximum deviation allowed relative to the standard deviation  (default 3)
+
+                    Returns:
+                    -- out_data: copy of original dataframe without outliers"""
+    out_data = data.copy()
+    if target_columns is None:
+        target_columns = list(out_data)
+    out_data_mean = out_data.mean()
+    out_data_std = out_data.std()
+    for column in target_columns:
+        out_data = out_data[np.abs(out_data[column] - out_data_mean[column]) <= std * out_data_std[column]]
+    return out_data

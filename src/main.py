@@ -42,19 +42,38 @@ data = date_to_month(data, options['date_to_month'])
 # Transform 1-to-K columns
 data, new_columns_K = one_to_K(data, options['one_to_k'])
 
-# Normalize columns
-non_normalized = options['non_normalized_columns']
-non_normalized.extend(options['binary_columns'].values())  # Add binary columns to non-normalized columns
-non_normalized.extend(new_columns_K)  # Add one-out-of-K columns to non-normalized columns
-data, data_mean, data_std = normalize(data, omit_columns=non_normalized)
+# removing outliers
+new_columns_K.extend(options['binary_columns'].values())  # Add binary columns to one-to-K columns
 
-# TODO removing outliers
+plt.figure()
+# Print initial values to check outliers
+for column in list(data):
+    if column not in new_columns_K:
+        plt.boxplot(data[column])
+        plt.title(column)
+        plt.show()
+# We will remove outliers ONLY if the column in question is not binary
+outliers_to_remove = [column for column in list(data) if column not in new_columns_K]  # list of target columns
+data = remove_outliers(data, target_columns=outliers_to_remove, std=3)  # remove outliers
+# Print new values to check outliers
+for column in list(data):
+    if column not in new_columns_K:
+        plt.boxplot(data[column])
+        plt.title(column)
+        plt.show()
 # TODO storing clean data to CSV files to avoid rerunning
+data.to_csv('../data/kc_house_data_clean.csv', index=False)
 
+'''
 # Divide data between train and test
 # TODO this only accepts holdout cross-validation method, shoud we think about K-fold?
 # TODO If normalization has to be done to train data, first we have to divide in train and test
 # TODO then normalize ONLY train data set
+# Normalize columns
+non_normalized = options['non_normalized_columns']
+non_normalized.extend(new_columns_K)  # Add one-out-of-K and binary columns to non-normalized columns
+data, data_mean, data_std = normalize(data, omit_columns=non_normalized)
+
 data_train, data_test = divide_data(data, options['train_size'])
 
 # Convert pandas dataframe to NumPy ndarray (compatibility with examples code)
@@ -63,3 +82,4 @@ attributeNames = list(data.columns.values)
 attributeNames.remove('price')
 y = data_train.values[:, 0]
 X = data_train.values[:, 1:]
+'''
