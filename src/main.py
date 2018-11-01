@@ -54,14 +54,13 @@ for column in list(data):
         plt.show()
 # We will remove outliers ONLY if the column in question is not binary
 outliers_to_remove = [column for column in list(data) if column not in new_columns_K]  # list of target columns
-data = remove_outliers(data, target_columns=outliers_to_remove, std=3)  # remove outliers
+data = remove_outliers(data, target_columns=outliers_to_remove, std=1)  # remove outliers
 # Print new values to check outliers
 for column in list(data):
     if column not in new_columns_K:
         plt.boxplot(data[column])
-        plt.title(column)
+        plt.title(column + " without outliers")
         plt.show()
-# TODO storing clean data to CSV files to avoid rerunning
 data.to_csv('../data/kc_house_data_clean.csv', index=False)
 
 '''
