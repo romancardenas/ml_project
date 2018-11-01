@@ -9,7 +9,10 @@ Created on Thu Nov  1 10:40:08 2018
 import pandas as pd
 import numpy as np
 from sklearn import tree
+from sklearn.model_selection import train_test_split
 import graphviz
+from scipy.stats import mode
+
 
 data = pd.read_csv('../data/kc_house_data_clean_regularzip.csv')
 
@@ -32,18 +35,25 @@ for x in range(7045):
 N, M = X.shape
 C = len(classNames)
 
+mode_zip = mode(allCNames)
+print('Predicting the most occuring zip yields an error of: {0}'.format(1-mode_zip[1]/7045))
+
+X_train, X_test, y_train, y_test = train_test_split(X,y, test_size = 0.25)
 
 # Fit regression tree classifier, Gini split criterion, no pruning
-dtc = tree.DecisionTreeClassifier(criterion='gini', min_samples_split=2)
-dtc = dtc.fit(X,y)
+dtc = tree.DecisionTreeClassifier(criterion='entropy', min_samples_split=2, max_depth = 5)
+dtc = dtc.fit(X_train,y_train)
+predicted = dtc.predict(X_test)
+i = 0;
+n = len(predicted)
+for x in range(n):
+    if predicted[x] == y_test[x]:
+        i=i+1
 
-# Export tree graph for visualization purposes:
-# (note: you can use i.e. Graphviz application to visualize the file)
-out = tree.export_graphviz(dtc, out_file='tree_gini.gvz', feature_names=attributeNames)
-#graphviz.render('dot','png','tree_gini',quiet=False)
-src=graphviz.Source.from_file('tree_gini.gvz')
-## Comment in to automatically open pdf
-## Note. If you get an error (e.g. exit status 1), try closing the pdf file/viewer
-src.render('../tree_gini', view=True)
+print('The error of this model is: {0} '.format(1-i/n))
 
-print('Done')
+
+
+
+
+
