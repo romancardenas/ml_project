@@ -19,7 +19,7 @@ options = {
                      'sqft_lot15'],
     'binary_columns': {},
     'date_to_month': {},
-    'one_to_k': ['zipcode'],  # The month, once extracted from date, will also turn to 1-out-of-K column
+    'one_to_k': [],  # The month, once extracted from date, will also turn to 1-out-of-K column
     'non_normalized_columns': ['price'],
     'train_size': 0.75,
 }
@@ -54,6 +54,7 @@ for column in list(data):
         plt.show()
 # We will remove outliers ONLY if the column in question is not binary
 outliers_to_remove = [column for column in list(data) if column not in new_columns_K]  # list of target columns
+outliers_to_remove.remove('zipcode')
 data = remove_outliers(data, target_columns=outliers_to_remove, std=1)  # remove outliers
 # Print new values to check outliers
 for column in list(data):
@@ -61,7 +62,7 @@ for column in list(data):
         plt.boxplot(data[column])
         plt.title(column + " without outliers")
         plt.show()
-data.to_csv('../data/kc_house_data_clean.csv', index=False)
+data.to_csv('../data/kc_house_data_clean_regularzip.csv', index=False)
 
 '''
 # Divide data between train and test
