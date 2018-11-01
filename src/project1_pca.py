@@ -1,4 +1,4 @@
-from src.main import *
+from src.main_regression import *
 from matplotlib.pyplot import figure, plot, title, xlabel, ylabel, show, legend
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.linalg import svd
