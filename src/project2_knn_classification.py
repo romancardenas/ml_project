@@ -45,7 +45,7 @@ col = 0;
 row = 0;
 
 for train_index, test_index in CV.split(X):
-    print('Computing CV fold: {0}/{1}..'.format(k+1,K))
+    #print('Computing CV fold: {0}/{1}..'.format(k+1,K))
 
     # extract training and test set for current CV fold
     X_train, y_train = X[train_index,:], y[train_index]
@@ -58,7 +58,7 @@ for train_index, test_index in CV.split(X):
     errors = np.zeros((K2,L))
     
     for dtrain_index, dval_index in CV2.split(X_train):
-        print('Computing inner CV fold: {0}/{1}..'.format(k2+1,K2))
+        #print('Computing inner CV fold: {0}/{1}..'.format(k2+1,K2))
         
         dtrainx, dtrainy = X_train[dtrain_index,:], y[dtrain_index]
         dtestx, dtesty = X_train[dval_index,:], y[dval_index]
@@ -78,7 +78,7 @@ for train_index, test_index in CV.split(X):
             best = sums[j]
             index = j
     figure()
-    plot(100*sum(errors,0)/N)
+    plot(100*sum(errors,0)/len(y_est))
     xlabel('Number of neighbors')
     ylabel('Classification error rate (%)')
     show()
@@ -96,4 +96,4 @@ for train_index, test_index in CV.split(X):
 
 
 
-print('Ran Exercise 7.1.2')
+#print('Ran Exercise 7.1.2')
