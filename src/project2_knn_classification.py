@@ -6,6 +6,7 @@ from scipy.io import loadmat
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn import model_selection
 import pandas as pd
+from sklearn.preprocessing import StandardScaler
 
 
 data = pd.read_csv('../data/kc_house_data_clean_regularzip.csv')
@@ -15,6 +16,8 @@ dataObjectNames = np.array(range(0,7045))
 attributeNames = ['price','bedrooms','bathrooms','sqft_living','sqft_lot','floors','condition','sqft_above','sqft_basement']
 
 X = np.asarray(data[['price','bedrooms','bathrooms','sqft_living','sqft_lot','floors','condition','sqft_above','sqft_basement']])
+
+X = StandardScaler().fit_transform(X)
 
 allCNames = np.array(data['zipcode'])
 
@@ -45,7 +48,7 @@ col = 0;
 row = 0;
 
 for train_index, test_index in CV.split(X):
-    #print('Computing CV fold: {0}/{1}..'.format(k+1,K))
+    print('Computing CV fold: {0}/{1}..'.format(k+1,K))
 
     # extract training and test set for current CV fold
     X_train, y_train = X[train_index,:], y[train_index]
@@ -58,7 +61,7 @@ for train_index, test_index in CV.split(X):
     errors = np.zeros((K2,L))
     
     for dtrain_index, dval_index in CV2.split(X_train):
-        #print('Computing inner CV fold: {0}/{1}..'.format(k2+1,K2))
+        print('Computing inner CV fold: {0}/{1}..'.format(k2+1,K2))
         
         dtrainx, dtrainy = X_train[dtrain_index,:], y[dtrain_index]
         dtestx, dtesty = X_train[dval_index,:], y[dval_index]
@@ -67,7 +70,7 @@ for train_index, test_index in CV.split(X):
             knclassifier = KNeighborsClassifier(n_neighbors=l);
             knclassifier.fit(dtrainx, dtrainy);
             y_est = knclassifier.predict(dtestx);
-            errors[k2,l-1] = np.sum(y_est[0]!=dtesty[0])
+            errors[k2,l-1] = np.sum(y_est!=dtesty)
         k2+=1
         
     index = 0;
@@ -78,7 +81,7 @@ for train_index, test_index in CV.split(X):
             best = sums[j]
             index = j
     figure()
-    plot(100*sum(errors,0)/len(y_est))
+    plot(10*sum(errors,0)/len(y_est))
     xlabel('Number of neighbors')
     ylabel('Classification error rate (%)')
     show()
