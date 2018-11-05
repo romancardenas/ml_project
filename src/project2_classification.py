@@ -97,8 +97,8 @@ for train_index, test_index in CV.split(X):
              dtc = dtc.fit(dtrainx,dtrainy.ravel())
              y_est_test = dtc.predict(dtestx)
              y_est_train = dtc.predict(dtrainx)
-             misclass_rate_test = sum(np.abs(y_est_test - dtesty)) / float(len(y_est_test))
-             misclass_rate_train = sum(np.abs(y_est_train - dtrainy)) /float(len(y_est_train))
+             misclass_rate_test = sum((y_est_test!=dtesty)) / float(len(y_est_test))
+             misclass_rate_train = sum((y_est_train!= dtrainy)) /float(len(y_est_train))
              inner_error_test[i,k2], inner_error_train[i,k2] = misclass_rate_test, misclass_rate_train
         k2+=1
         
@@ -137,8 +137,8 @@ for train_index, test_index in CV.split(X):
     y_est_test = dtc.predict(X_test)
     y_est_train = dtc.predict(X_train)
     # Evaluate misclassification rate over train/test data (in this CV fold)
-    misclass_rate_test = sum(np.abs(y_est_test - y_test)) / float(len(y_est_test))
-    misclass_rate_train = sum(np.abs(y_est_train - y_train)) / float(len(y_est_train))
+    misclass_rate_test = sum((y_est_test!=y_test)) / float(len(y_est_test))
+    misclass_rate_train = sum((y_est_train!=y_train)) / float(len(y_est_train))
     Error_test[k], Error_train[k] = misclass_rate_test, misclass_rate_train
     optimal_depth[k] = tc[index]
     k+=1

@@ -36,7 +36,7 @@ C = len(classNames)
 # Maximum number of neighbors
 # K-fold crossvalidation
 K = 10
-L = 40
+L = 80
 CV = model_selection.KFold(n_splits=K,shuffle=True)
 
 # Initialize variable

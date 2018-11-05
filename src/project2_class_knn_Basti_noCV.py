@@ -47,7 +47,7 @@ C = len(classNames)
 
 # Maximum number of neighbors
 # K-fold crossvalidation
-K = 1
+K = 15
 L = 40
 dist = 1
 
