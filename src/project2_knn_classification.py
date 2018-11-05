@@ -80,8 +80,9 @@ for train_index, test_index in CV.split(X):
         if sums[j] < best:
             best = sums[j]
             index = j
+    print("index : {0} selected as best with error of {1}".format(index, best/N))
     figure()
-    plot(10*sum(errors,0)/len(y_est))
+    plot(100*(sums/N))
     xlabel('Number of neighbors')
     ylabel('Classification error rate (%)')
     show()
