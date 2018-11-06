@@ -3,13 +3,13 @@ import numpy as np
 import neurolab as nl
 from sklearn.model_selection import KFold
 import sklearn.linear_model as lm
-from matplotlib.pyplot import figure, plot, subplot, title, xlabel, ylabel, show, clim
+from matplotlib.pyplot import figure, plot, subplot, title, xlabel, ylabel, show, clim, legend
 from toolbox_02450 import feature_selector_lr, bmplot
 from scipy import stats
 
 # Read data from CSV file
-data = pd.read_csv('../data/kc_house_data_clean_regression_nozip.csv')  # Select this if you don't want ZIP codes
-#data = pd.read_csv('../data/kc_house_data_clean_regression_zip.csv')  # Select this if you want to include ZIP codes
+#data = pd.read_csv('../data/kc_house_data_clean_regression_nozip.csv')  # Select this if you don't want ZIP codes
+data = pd.read_csv('../data/kc_house_data_clean_regression_zip.csv')  # Select this if you want to include ZIP codes
 # Make the script compatible with the course naming convention
 attributeNames = list(data)[1:]
 X = data.values[:, 1:]
@@ -49,7 +49,7 @@ ANN_Error_train = np.empty((K, 1))          # Train error (Artificial Neural Net
 ANN_Error_test = np.empty((K, 1))           # Test error (Artificial Neural Network)
 
 #n_hidden_units_test = [2]
-n_hidden_units_test = [4, 6, 8]                # number of hidden units to check (multiplied by the number of inputs)
+n_hidden_units_test = [4, 6, 8, 10]                # number of hidden units to check (multiplied by the number of inputs)
 n_hidden_units_test = [i * M for i in n_hidden_units_test]
 n_train = 2                                 # number of networks trained in each k-fold
 learning_goal = 100000                      # stop criterion 1 (train mse to be reached)
@@ -94,18 +94,20 @@ for train_index, test_index in CV.split(X):  # Outer 2-layer cross-validation lo
     textout = ''
     selected_features, features_record, loss_record = feature_selector_lr(X_train, y_train, K_internal, display=textout)
     LR_Features_fs[selected_features, k] = 1
-    if len(selected_features) is 0:
-        print('No features were selected, i.e. the data (X) in the fold cannot describe the outcomes (y).')
-    else:
-        figure()
-        plot(range(1, len(loss_record)), loss_record[1:])
-        xlabel('Iteration')
-        ylabel('Squared error (crossvalidation)')
-        title('Linear regression with forward feature selection CV: {0}/{1}'.format(k + 1, K))
-        show()
+    m = lm.LinearRegression(fit_intercept=True).fit(X_train[:, selected_features], y_train)
+    LR_Params_fs.append(m.coef_)
+    LR_Error_train_fs[k] = np.square(y_train - m.predict(X_train[:, selected_features])).sum() / y_train.shape[0]
+    LR_Error_test_fs[k] = np.square(y_test - m.predict(X_test[:, selected_features])).sum() / y_test.shape[0]
 
-    print('Train error: {0}'.format(LR_Error_train[k]))
-    print('Test error: {0}'.format(LR_Error_test[k]))
+    figure()
+    plot(range(1, len(loss_record)), loss_record[1:])
+    xlabel('Iteration')
+    ylabel('Squared error (crossvalidation)')
+    title('Linear regression with forward feature selection CV: {0}/{1}'.format(k + 1, K))
+    show()
+
+    print('Train error: {0}'.format(LR_Error_train_fs[k]))
+    print('Test error: {0}'.format(LR_Error_test_fs[k]))
     print('Features no: {0}\n'.format(selected_features.size))
 
     ##################################################################################
@@ -175,7 +177,7 @@ for train_index, test_index in CV.split(X):  # Outer 2-layer cross-validation lo
     k += 1
 
 # Figure with ANN generalization error
-figure()
+figure(figsize=(9, 6))
 plot(range(1, ANN_Error_test.shape[0]+1), ANN_Error_test)
 xlabel('Iteration')
 ylabel('Squared error (crossvalidation)')
@@ -184,11 +186,22 @@ show()
 
 
 # Figure with linear regression with feature selection generalization error
-figure()
+figure(figsize=(9, 6))
 plot(range(1, LR_Error_test_fs.shape[0]+1), LR_Error_test_fs)
 xlabel('Iteration')
 ylabel('Squared error (crossvalidation)')
 title('Linear Regression with Feature Selection Generalization Error')
+show()
+
+# Figure with everything
+figure(figsize=(9, 6))
+plot(range(1, Error_test_nofeatures.shape[0]+1), Error_test_nofeatures)
+plot(range(1, LR_Error_test_fs.shape[0]+1), LR_Error_test_fs)
+plot(range(1, ANN_Error_test.shape[0]+1), ANN_Error_test)
+legend(['Average', 'LR with fs', 'ANN'])
+xlabel('Iteration')
+ylabel('Squared error (crossvalidation)')
+title('Models Generalization Error')
 show()
 
 
@@ -199,7 +212,7 @@ print('- [LR_fs] Generalization error for each fold: {0}'.format(str(LR_Error_te
 
 for i in range(LR_Features_fs.shape[1]):
     used_attributes = [attributeNames[j] for j in range(LR_Features_fs.shape[0]) if LR_Features_fs[j, i] > 0]
-    used_params = {used_attributes[j]: LR_Params_fs[i][j] for j in range(len(used_attributes))}
+    used_params = {used_attributes[j]: LR_Params_fs[i][j] for j in range(len(used_attributes))} # TODO
     print('- [LR_fs] feature selection for fold {0}: {1}'.format(i + 1, str(used_attributes)))
     print('- [LR_fs] parameters used (with normalized data): {0}'.format(str(used_params)))
 print("DATA SET MEAN: {0}".format(X_mean))
@@ -248,7 +261,7 @@ sig = (z-zb).std() / np.sqrt(K-1)
 alpha = 0.05
 zL = zb + sig * stats.t.ppf(alpha/2, nu)
 zH = zb + sig * stats.t.ppf(1-alpha/2, nu)
-if zL <= 0 <= zH:
+if zL <= 0 and 0 <= zH:
     print('Classifiers are not significantly different')
 else:
     print('Classifiers are significantly different.')
