@@ -13,9 +13,13 @@ data = pd.read_csv('../data/kc_house_data_clean_regression_nozip.csv')  # Select
 attributeNames = list(data)[1:]
 X = data.values[:, 1:]
 y = data.values[:, 0]
+
+# Standardize data
+X_mean = X.mean(axis=0)  # Store mean and standard deviation for data reconstruction
+X_std = X.std(axis=0)
+X = (X - X_mean) / X_std
+
 N, M = X.shape
-print(N)
-print(M)
 
 #################################################################################
 #                                                                               #
@@ -31,9 +35,6 @@ Error_train_nofeatures = np.empty((K, 1))   # Train error (base case)
 Error_test_nofeatures = np.empty((K, 1))    # Test error (base case)
 
 # Initialize variables for linear regression
-X_train_mean = np.zeros((K, M))             # It will contain the train set mean for each fold
-X_train_std = np.ones((K, M))              # It will contain the train set standard deviation for each fold
-
 LR_Error_train = np.empty((K, 1))           # Train error (all features)
 LR_Error_test = np.empty((K, 1))            # Test error (all features)
 LR_Features = np.zeros((M, K))              # For keeping track of selected features
@@ -41,11 +42,13 @@ LR_Error_train_fs = np.empty((K, 1))        # Train error (feature selection)
 LR_Error_test_fs = np.empty((K, 1))         # Test error (feature selection)
 
 # Initialize variables for artificial neural network
-ANN_hidden_layers = np.empty((K, 1))        # Number of hidden layers (Artificial Neural Network)
+ANN_hidden_units = np.empty((K, 1))         # Number of hidden units (Artificial Neural Network)
 ANN_Error_train = np.empty((K, 1))          # Train error (Artificial Neural Network)
 ANN_Error_test = np.empty((K, 1))           # Test error (Artificial Neural Network)
 
-n_hidden_units_test = [2, 3]                # number of hidden units to check
+#n_hidden_units_test = [2]
+n_hidden_units_test = [2, 3, 4]                # number of hidden units to check (multiplied by the number of inputs)
+n_hidden_units_test = [i * M for i in n_hidden_units_test]
 n_train = 2                                 # number of networks trained in each k-fold
 learning_goal = 100000                      # stop criterion 1 (train mse to be reached)
 max_epochs = 100                            # stop criterion 2 (max epochs in training)
@@ -61,13 +64,6 @@ for train_index, test_index in CV.split(X):  # Outer 2-layer cross-validation lo
     y_train = y[train_index]
     X_test = X[test_index, :]
     y_test = y[test_index]
-
-    # Normalize the training set
-    X_train_mean[k, :] = X_train.mean(axis=0)
-    X_train_std[k, :] = X_train.std(axis=0)
-
-    X_train = (X_train - X_train_mean[k, :]) / X_train_std[k, :]
-    X_test = (X_test - X_train_mean[k, :]) / X_train_std[k, :]
 
     ##################################################################################
     #                                                                                #
@@ -104,16 +100,10 @@ for train_index, test_index in CV.split(X):  # Outer 2-layer cross-validation lo
         LR_Error_test_fs[k] = np.square(y_test - m.predict(X_test[:, selected_features])).sum() / y_test.shape[0]
 
         figure(k)
-        subplot(1, 2, 1)
         plot(range(1, len(loss_record)), loss_record[1:])
         xlabel('Iteration')
         ylabel('Squared error (crossvalidation)')
-
-        subplot(1, 2, 2)
-        bmplot(attributeNames, range(1, features_record.shape[1]), -features_record[:, 1:])
-        clim(-1.5, 0)
-        xlabel('Iteration')
-        title('Linear regression CV: {0}'.format(k+1))
+        title('Linear regression with forward feature selection CV: {0}/{1}'.format(k + 1, K))
         show()
     print('Train error: {0}'.format(LR_Error_train[k]))
     print('Test error: {0}'.format(LR_Error_test[k]))
@@ -125,7 +115,7 @@ for train_index, test_index in CV.split(X):  # Outer 2-layer cross-validation lo
     #                                                                                #
     ##################################################################################
 
-    K_internal = 10
+    K_internal = 3
     n_hidden_units_select = np.empty((K_internal, 1))       # Store the selected number of hidden units
     inner_fold_error_ANN = np.empty((K_internal, 1))        # Store the error for each inner fold
 
@@ -148,39 +138,65 @@ for train_index, test_index in CV.split(X):  # Outer 2-layer cross-validation lo
             for i in range(n_train):
                 print('Training network {0}/{1}...'.format(i + 1, n_train))
                 # Create randomly initialized network with 2 layers
-                ann = nl.net.newff([[-3, 8]] * M, [n_hidden_units, 1], [nl.trans.TanSig(), nl.trans.PureLin()])
-                if i == 0:
-                   bestnet = ann
+                ann = nl.net.newff([[-3, 8]] * M, [n_hidden_units, 1], [nl.trans.PureLin(), nl.trans.PureLin()])
+                #ann = nl.net.newff([[-3, 8]] * M, [n_hidden_units, 1], [nl.trans.TanSig(), nl.trans.PureLin()])
+                #if i == 0:
+                #   bestnet = ann
                 # train network
                 train_error = ann.train(X_ANN_train, y_ANN_train.reshape(-1, 1), goal=learning_goal,
                                         epochs=max_epochs//2, show=show_error_freq)
-                if train_error[-1] < best_train_error:
-                    bestnet = ann
-                    best_train_error = train_error[-1]
+                # nl.net.train computes by default SSE.
+                # By multiplying by 2 and dividing by the number samples, we get the MSE
+                train_error = 2 * train_error[-1] / y_ANN_train.shape[0]
+                if train_error < best_train_error:
+                    bestnet = ann.copy()
+                    best_train_error = train_error
                     bestlayer = n_hidden_units
         print('Best train error: {0} (with {1} hidden layers)'.format(best_train_error, bestlayer))
         y_ANN_est = bestnet.sim(X_ANN_test).squeeze()
-        inner_fold_error_ANN[k] = np.power(y_ANN_est - y_ANN_test, 2).sum().astype(float) / y_ANN_test.shape[0]
-        n_hidden_units_select[k] = bestlayer
+        inner_fold_error_ANN[inner_k] = np.power(y_ANN_est - y_ANN_test, 2).sum().astype(float) / y_ANN_test.shape[0]
+        n_hidden_units_select[inner_k] = bestlayer
         inner_k += 1
-    best_index = np.argmin(inner_fold_error_ANN)
-    ANN_hidden_layers[k] = n_hidden_units_select[best_index]
-    best_ann = nl.net.newff([[-3, 8]] * M, [n_hidden_units_select[best_index], 1], [nl.trans.TanSig(), nl.trans.PureLin()])
+    best_index = np.asscalar(np.argmin(inner_fold_error_ANN))
+    ANN_hidden_units[k] = n_hidden_units_select[best_index]
+    best_ann = nl.net.newff([[-3, 8]] * M, [int(np.asscalar(n_hidden_units_select[best_index])), 1],
+                            [nl.trans.PureLin(), nl.trans.PureLin()])
+    # best_ann = nl.net.newff([[-3, 8]] * M, [int(np.asscalar(n_hidden_units_select[best_index])), 1], [nl.trans.TanSig(), nl.trans.PureLin()])
     bestnet = None
     best_train_error = np.inf
     for i in range(n_train):
-        if i == 0:
-            bestnet = ann
-        error = best_ann.train(X_train, y_train.reshape(-1, 1), goal=learning_goal, epochs=max_epochs, show=show_error_freq)
-        if train_error[-1] < best_train_error:
-            bestnet = ann
-            best_train_error = train_error[-1]
+        #if i == 0:
+        #    bestnet = ann
+        train_error = best_ann.train(X_train, y_train.reshape(-1, 1), goal=learning_goal, epochs=max_epochs,
+                               show=show_error_freq)
+        # nl.net.train computes by default SSE. By multiplying by 2 and dividing by the number samples, we get the MSE
+        train_error = 2 * train_error[-1] / y_train.shape[0]
+        if train_error < best_train_error:
+            bestnet = best_ann.copy()
+            best_train_error = train_error
     ANN_Error_train[k] = best_train_error
     y_est = bestnet.sim(X_test).squeeze()
     ANN_Error_test[k] = np.power(y_test - y_est, 2).sum().astype(float) / y_test.shape[0]
     print('Train error: {0}'.format(ANN_Error_train[k]))
     print('Test error: {0}'.format(ANN_Error_test[k]))
     k += 1
+
+# Figure with ANN generalization error
+figure()
+plot(range(1, ANN_Error_test.shape[0]+1), ANN_Error_test)
+xlabel('Iteration')
+ylabel('Squared error (crossvalidation)')
+title('Artificial Neural Network Generalization Error')
+show()
+
+
+# Figure with linear regression with feature selection generalization error
+figure()
+plot(range(1, LR_Error_test_fs.shape[0]+1), LR_Error_test_fs)
+xlabel('Iteration')
+ylabel('Squared error (crossvalidation)')
+title('Linear Regression with Feature Selection Generalization Error')
+show()
 
 print("\n")
 print('##################################################################################')
@@ -209,8 +225,13 @@ print('- R^2 test:       {0}'.format((Error_test_nofeatures.sum() - LR_Error_tes
 print('\n')
 print('---------------------------- ARTIFICIAL NEURAL NETWORK ----------------------------')
 print('\n')
-print('- Number of hidden layer for each fold: {0}'.format(str(ANN_hidden_layers)))
+
 print('- Training error: {0}'.format(ANN_Error_train.mean()))
 print('- Test error: {0}'.format(ANN_Error_test.mean()))
 print('- R^2 train:      {0}'.format((Error_train_nofeatures.sum() - LR_Error_train_fs.sum()) / Error_train_nofeatures.sum()))
 print('- R^2 test:       {0}'.format((Error_test_nofeatures.sum() - LR_Error_test_fs.sum()) / Error_test_nofeatures.sum()))
+
+print('----------------------------------- FOR REPORT -----------------------------------')
+print('- [ANN] Number of hidden units for each fold: {0}'.format(str(ANN_hidden_units)))
+print('- [ANN] Generalization error for each fold: {0}'.format(str(ANN_Error_test)))
+print('- [LR_fs] Generalization error for each fold: {0}'.format(str(LR_Error_test_fs)))
