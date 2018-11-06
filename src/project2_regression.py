@@ -5,10 +5,11 @@ from sklearn.model_selection import KFold
 import sklearn.linear_model as lm
 from matplotlib.pyplot import figure, plot, subplot, title, xlabel, ylabel, show, clim
 from toolbox_02450 import feature_selector_lr, bmplot
+from scipy import stats
 
 # Read data from CSV file
 data = pd.read_csv('../data/kc_house_data_clean_regression_nozip.csv')  # Select this if you don't want ZIP codes
-# data = pd.read_csv('../data/kc_house_data_clean_regression_zip.csv')  # Select this if you want to include ZIP codes
+#data = pd.read_csv('../data/kc_house_data_clean_regression_zip.csv')  # Select this if you want to include ZIP codes
 # Make the script compatible with the course naming convention
 attributeNames = list(data)[1:]
 X = data.values[:, 1:]
@@ -37,7 +38,8 @@ Error_test_nofeatures = np.empty((K, 1))    # Test error (base case)
 # Initialize variables for linear regression
 LR_Error_train = np.empty((K, 1))           # Train error (all features)
 LR_Error_test = np.empty((K, 1))            # Test error (all features)
-LR_Features = np.zeros((M, K))              # For keeping track of selected features
+LR_Features_fs = np.zeros((M, K))           # For keeping track of selected features
+LR_Params_fs = list()                       # List with linear regression params
 LR_Error_train_fs = np.empty((K, 1))        # Train error (feature selection)
 LR_Error_test_fs = np.empty((K, 1))         # Test error (feature selection)
 
@@ -47,7 +49,7 @@ ANN_Error_train = np.empty((K, 1))          # Train error (Artificial Neural Net
 ANN_Error_test = np.empty((K, 1))           # Test error (Artificial Neural Network)
 
 #n_hidden_units_test = [2]
-n_hidden_units_test = [2, 3, 4]                # number of hidden units to check (multiplied by the number of inputs)
+n_hidden_units_test = [4, 6, 8]                # number of hidden units to check (multiplied by the number of inputs)
 n_hidden_units_test = [i * M for i in n_hidden_units_test]
 n_train = 2                                 # number of networks trained in each k-fold
 learning_goal = 100000                      # stop criterion 1 (train mse to be reached)
@@ -91,20 +93,17 @@ for train_index, test_index in CV.split(X):  # Outer 2-layer cross-validation lo
     K_internal = 10
     textout = ''
     selected_features, features_record, loss_record = feature_selector_lr(X_train, y_train, K_internal, display=textout)
-    LR_Features[selected_features, k] = 1
+    LR_Features_fs[selected_features, k] = 1
     if len(selected_features) is 0:
         print('No features were selected, i.e. the data (X) in the fold cannot describe the outcomes (y).')
     else:
-        m = lm.LinearRegression(fit_intercept=True).fit(X_train[:, selected_features], y_train)
-        LR_Error_train_fs[k] = np.square(y_train - m.predict(X_train[:, selected_features])).sum() / y_train.shape[0]
-        LR_Error_test_fs[k] = np.square(y_test - m.predict(X_test[:, selected_features])).sum() / y_test.shape[0]
-
-        figure(k)
+        figure()
         plot(range(1, len(loss_record)), loss_record[1:])
         xlabel('Iteration')
         ylabel('Squared error (crossvalidation)')
         title('Linear regression with forward feature selection CV: {0}/{1}'.format(k + 1, K))
         show()
+
     print('Train error: {0}'.format(LR_Error_train[k]))
     print('Test error: {0}'.format(LR_Error_test[k]))
     print('Features no: {0}\n'.format(selected_features.size))
@@ -114,7 +113,6 @@ for train_index, test_index in CV.split(X):  # Outer 2-layer cross-validation lo
     #                           ARTIFICIAL NEURAL NETWORK                            #
     #                                                                                #
     ##################################################################################
-
     K_internal = 3
     n_hidden_units_select = np.empty((K_internal, 1))       # Store the selected number of hidden units
     inner_fold_error_ANN = np.empty((K_internal, 1))        # Store the error for each inner fold
@@ -138,10 +136,8 @@ for train_index, test_index in CV.split(X):  # Outer 2-layer cross-validation lo
             for i in range(n_train):
                 print('Training network {0}/{1}...'.format(i + 1, n_train))
                 # Create randomly initialized network with 2 layers
-                ann = nl.net.newff([[-3, 8]] * M, [n_hidden_units, 1], [nl.trans.PureLin(), nl.trans.PureLin()])
-                #ann = nl.net.newff([[-3, 8]] * M, [n_hidden_units, 1], [nl.trans.TanSig(), nl.trans.PureLin()])
-                #if i == 0:
-                #   bestnet = ann
+                #ann = nl.net.newff([[-3, 8]] * M, [n_hidden_units, 1], [nl.trans.PureLin(), nl.trans.PureLin()])
+                ann = nl.net.newff([[-3, 8]] * M, [n_hidden_units, 1], [nl.trans.TanSig(), nl.trans.PureLin()])
                 # train network
                 train_error = ann.train(X_ANN_train, y_ANN_train.reshape(-1, 1), goal=learning_goal,
                                         epochs=max_epochs//2, show=show_error_freq)
@@ -159,14 +155,11 @@ for train_index, test_index in CV.split(X):  # Outer 2-layer cross-validation lo
         inner_k += 1
     best_index = np.asscalar(np.argmin(inner_fold_error_ANN))
     ANN_hidden_units[k] = n_hidden_units_select[best_index]
-    best_ann = nl.net.newff([[-3, 8]] * M, [int(np.asscalar(n_hidden_units_select[best_index])), 1],
-                            [nl.trans.PureLin(), nl.trans.PureLin()])
-    # best_ann = nl.net.newff([[-3, 8]] * M, [int(np.asscalar(n_hidden_units_select[best_index])), 1], [nl.trans.TanSig(), nl.trans.PureLin()])
+    #best_ann = nl.net.newff([[-3, 8]] * M, [int(np.asscalar(n_hidden_units_select[best_index])), 1], [nl.trans.PureLin(), nl.trans.PureLin()])
+    best_ann = nl.net.newff([[-3, 8]] * M, [int(np.asscalar(n_hidden_units_select[best_index])), 1], [nl.trans.TanSig(), nl.trans.PureLin()])
     bestnet = None
     best_train_error = np.inf
     for i in range(n_train):
-        #if i == 0:
-        #    bestnet = ann
         train_error = best_ann.train(X_train, y_train.reshape(-1, 1), goal=learning_goal, epochs=max_epochs,
                                show=show_error_freq)
         # nl.net.train computes by default SSE. By multiplying by 2 and dividing by the number samples, we get the MSE
@@ -198,7 +191,21 @@ ylabel('Squared error (crossvalidation)')
 title('Linear Regression with Feature Selection Generalization Error')
 show()
 
-print("\n")
+
+print('----------------------------------- FOR REPORT -----------------------------------')
+print('- [ANN] Number of hidden units for each fold: {0}'.format(str(ANN_hidden_units)))
+print('- [ANN] Generalization error for each fold: {0}'.format(str(ANN_Error_test)))
+print('- [LR_fs] Generalization error for each fold: {0}'.format(str(LR_Error_test_fs)))
+
+for i in range(LR_Features_fs.shape[1]):
+    used_attributes = [attributeNames[j] for j in range(LR_Features_fs.shape[0]) if LR_Features_fs[j, i] > 0]
+    used_params = {used_attributes[j]: LR_Params_fs[i][j] for j in range(len(used_attributes))}
+    print('- [LR_fs] feature selection for fold {0}: {1}'.format(i + 1, str(used_attributes)))
+    print('- [LR_fs] parameters used (with normalized data): {0}'.format(str(used_params)))
+print("DATA SET MEAN: {0}".format(X_mean))
+print("DATA SET STANDARD DEVIATION: {0}".format(X_std))
+
+print("\n\n\n\n\n")
 print('##################################################################################')
 print('#                                                                                #')
 print('#                                   DISPLAY RESULTS                              #')
@@ -228,10 +235,20 @@ print('\n')
 
 print('- Training error: {0}'.format(ANN_Error_train.mean()))
 print('- Test error: {0}'.format(ANN_Error_test.mean()))
-print('- R^2 train:      {0}'.format((Error_train_nofeatures.sum() - LR_Error_train_fs.sum()) / Error_train_nofeatures.sum()))
-print('- R^2 test:       {0}'.format((Error_test_nofeatures.sum() - LR_Error_test_fs.sum()) / Error_test_nofeatures.sum()))
+print('- R^2 train:      {0}'.format((Error_train_nofeatures.sum() - ANN_Error_train.sum()) / Error_train_nofeatures.sum()))
+print('- R^2 test:       {0}'.format((Error_test_nofeatures.sum() - ANN_Error_test.sum()) / Error_test_nofeatures.sum()))
 
-print('----------------------------------- FOR REPORT -----------------------------------')
-print('- [ANN] Number of hidden units for each fold: {0}'.format(str(ANN_hidden_units)))
-print('- [ANN] Generalization error for each fold: {0}'.format(str(ANN_Error_test)))
-print('- [LR_fs] Generalization error for each fold: {0}'.format(str(LR_Error_test_fs)))
+print('\n')
+print('-------------------------------- MODELS COMPARISON --------------------------------')
+print('\n')
+z = (LR_Error_test_fs - ANN_Error_test)
+zb = z.mean()
+nu = K - 1
+sig = (z-zb).std() / np.sqrt(K-1)
+alpha = 0.05
+zL = zb + sig * stats.t.ppf(alpha/2, nu)
+zH = zb + sig * stats.t.ppf(1-alpha/2, nu)
+if zL <= 0 <= zH:
+    print('Classifiers are not significantly different')
+else:
+    print('Classifiers are significantly different.')
