@@ -53,8 +53,7 @@ ANN_Error_test = np.empty((K, 1))           # Test error (Artificial Neural Netw
 
 adam = optimizers.Adam(lr=0.3, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.00001)
 
-#n_hidden_units_test = [2]
-n_hidden_units_test = [4, 6, 8, 10]                # number of hidden units to check (multiplied by the number of inputs)
+n_hidden_units_test = [10, 12, 14, 16]         # number of hidden units to check (multiplied by the number of inputs)
 n_hidden_units_test = [i * M for i in n_hidden_units_test]
 n_train = 2                                 # number of networks trained in each k-fold
 learning_goal = 100000                      # stop criterion 1 (train mse to be reached)
@@ -166,8 +165,6 @@ for train_index, test_index in CV.split(X):  # Outer 2-layer cross-validation lo
         print('Best validation error: {0} (with {1} hidden layers)'.format(best_val_error, bestlayer))
         inner_fold_error_ANN[inner_k] = best_val_error
         n_hidden_units_select[inner_k] = bestlayer
-        #y_ANN_est = bestnet.predict(X_ANN_test).squeeze()
-        #inner_fold_error_ANN[inner_k] = np.power(y_ANN_est - y_ANN_test, 2).sum().astype(float) / y_ANN_test.shape[0]
         inner_k += 1
     best_index = np.asscalar(np.argmin(inner_fold_error_ANN))
     ANN_hidden_units[k] = n_hidden_units_select[best_index]
@@ -185,11 +182,9 @@ for train_index, test_index in CV.split(X):  # Outer 2-layer cross-validation lo
         model.compile(loss='mean_squared_error', optimizer=adam)
 
         history = model.fit(X_train, y_train, epochs=max_epochs, batch_size=X_train.shape[0], verbose=0,
-                            validation_data=(X_train, y_train))
+                            validation_data=(X_test, y_test))
         train_error = history.history['loss'][-1]
         val_error = history.history['val_loss'][-1]
-        #y_est = model.predict(X_train)
-        #train_error = np.power(y_est - y_train, 2).sum().astype(float) / y_train.shape[0]
         print('        Training error: {0}'.format(train_error))
         if train_error < best_train_error:
             bestnet = model
@@ -197,8 +192,6 @@ for train_index, test_index in CV.split(X):  # Outer 2-layer cross-validation lo
             best_val_error = val_error
     ANN_Error_train[k] = best_train_error
     ANN_Error_test[k] = best_val_error
-    #y_est = bestnet.predict(X_test).squeeze()
-    #ANN_Error_test[k] = np.power(y_test - y_est, 2).sum().astype(float) / y_test.shape[0]
     k += 1
 
 # Figure with ANN generalization error
@@ -237,7 +230,7 @@ print('- [LR_fs] Generalization error for each fold: {0}'.format(str(LR_Error_te
 
 for i in range(LR_Features_fs.shape[1]):
     used_attributes = [attributeNames[j] for j in range(LR_Features_fs.shape[0]) if LR_Features_fs[j, i] > 0]
-    used_params = {used_attributes[j]: LR_Params_fs[i][j] for j in range(len(used_attributes))} # TODO
+    used_params = {used_attributes[j]: LR_Params_fs[i][j] for j in range(len(used_attributes))}
     print('- [LR_fs] feature selection for fold {0}: {1}'.format(i + 1, str(used_attributes)))
     print('- [LR_fs] parameters used (with normalized data): {0}'.format(str(used_params)))
 print("DATA SET MEAN: {0}".format(X_mean))
