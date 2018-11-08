@@ -18,6 +18,8 @@ attributeNames = list(data)[1:]
 X = data.values[:, 1:]
 y = data.values[:, 0]
 
+print(attributeNames)
+
 # Standardize data
 X_mean = X.mean(axis=0)  # Store mean and standard deviation for data reconstruction
 X_std = X.std(axis=0)
