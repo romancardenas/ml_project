@@ -1,0 +1,32 @@
+digraph Tree {
+node [shape=box] ;
+0 [label="sqft_lot <= 2847.0\ngini = 0.735\nsamples = 12351\nvalue = [2621, 3568, 4024, 2138]"] ;
+1 [label="sqft_lot <= 1532.5\ngini = 0.689\nsamples = 906\nvalue = [116, 182, 194, 414]"] ;
+0 -> 1 [labeldistance=2.5, labelangle=45, headlabel="True"] ;
+2 [label="sqft_above <= 762.5\ngini = 0.581\nsamples = 400\nvalue = [43, 56, 59, 242]"] ;
+1 -> 2 ;
+3 [label="gini = 0.675\nsamples = 27\nvalue = [2, 5, 12, 8]"] ;
+2 -> 3 ;
+4 [label="gini = 0.56\nsamples = 373\nvalue = [41, 51, 47, 234]"] ;
+2 -> 4 ;
+5 [label="bathrooms <= 2.125\ngini = 0.73\nsamples = 506\nvalue = [73, 126, 135, 172]"] ;
+1 -> 5 ;
+6 [label="gini = 0.747\nsamples = 225\nvalue = [47, 62, 61, 55]"] ;
+5 -> 6 ;
+7 [label="gini = 0.697\nsamples = 281\nvalue = [26, 64, 74, 117]"] ;
+5 -> 7 ;
+8 [label="floors <= 1.75\ngini = 0.73\nsamples = 11445\nvalue = [2505, 3386, 3830, 1724]"] ;
+0 -> 8 [labeldistance=2.5, labelangle=-45, headlabel="False"] ;
+9 [label="sqft_lot <= 6126.5\ngini = 0.717\nsamples = 7559\nvalue = [1747, 2358, 2613, 841]"] ;
+8 -> 9 ;
+10 [label="gini = 0.73\nsamples = 1991\nvalue = [486, 606, 627, 272]"] ;
+9 -> 10 ;
+11 [label="gini = 0.712\nsamples = 5568\nvalue = [1261, 1752, 1986, 569]"] ;
+9 -> 11 ;
+12 [label="sqft_lot <= 6369.5\ngini = 0.742\nsamples = 3886\nvalue = [758, 1028, 1217, 883]"] ;
+8 -> 12 ;
+13 [label="gini = 0.738\nsamples = 1732\nvalue = [306, 388, 487, 551]"] ;
+12 -> 13 ;
+14 [label="gini = 0.729\nsamples = 2154\nvalue = [452, 640, 730, 332]"] ;
+12 -> 14 ;
+}

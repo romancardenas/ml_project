@@ -134,6 +134,8 @@ dtc_Error_train = np.empty((K,1))
 dtc_Error_test = np.empty((K,1))
 dtc_optimal_depth = np.empty((K,1))
 
+baseline_Error = np.empty((K,1))
+
 k=0
 col = 0;
 row = 0;
@@ -279,12 +281,42 @@ for train_index, test_index in CV.split(X):
     y_est_prob_final = nb_classifier_final.predict_proba(X_test)
     y_est_final = np.argmax(y_est_prob_final,1)
     
+    baseline_Error[k] = sum((2!=y_train)) / float(len(y_train))
     
     NB_Error_test[k] = np.sum(y_est_final!=y_test,dtype=float)/y_test.shape[0]
     
 #    AllErrors[k,:] = [misclass_rate_test, misclass_rate_train, dtc_index, knn_Error_test[k], knn_index+1, NB_Error_test[k], fin_prior]
     k+=1
+    
+    
 
+#    # Export tree graph for visualization purposes:
+#    # (note: you can use i.e. Graphviz application to visualize the file)
+#    out = tree.export_graphviz(dtc, out_file='tree_gini_final.gvz', feature_names=attributeNames)
+#    #graphviz.render('dot','png','tree_gini',quiet=False)
+#    src=graphviz.Source.from_file('tree_gini_final.gvz')
+#    ## Comment in to automatically open pdf
+#    ## Note. If you get an error (e.g. exit status 1), try closing the pdf file/viewer
+#    src.render('../tree_gini_final', view=True)
+#
+#
+#    
+#    figure(2)
+#    styles = ['.b', '.r', '.g', '.y']
+#    for c in range(C):
+#        class_mask = (y_train==c)
+#        plot(X_train[class_mask,0], X_train[class_mask,1], styles[c])
+#    
+#    styles = ['ob', 'or', 'og', 'oy']
+#    for c in range(C):
+#        class_mask = (y_est==c)
+#        plot(X_test[class_mask,0], X_test[class_mask,1], styles[c], markersize=10)
+#        plot(X_test[class_mask,0], X_test[class_mask,1], 'kx', markersize=1)
+#
+#    
+#    
+#    
+#    show()
 
 #index = 0;
 #means = np.mean(Error_test, axis = 1)
