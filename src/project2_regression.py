@@ -53,7 +53,7 @@ ANN_Error_test = np.empty((K, 1))           # Test error (Artificial Neural Netw
 
 adam = optimizers.Adam(lr=0.3, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.00001)
 
-n_hidden_units_test = [10, 12, 14, 16]         # number of hidden units to check (multiplied by the number of inputs)
+n_hidden_units_test = [22, 24, 26, 28]         # number of hidden units to check (multiplied by the number of inputs)
 n_hidden_units_test = [i * M for i in n_hidden_units_test]
 n_train = 2                                 # number of networks trained in each k-fold
 learning_goal = 100000                      # stop criterion 1 (train mse to be reached)
