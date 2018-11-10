@@ -1,3 +1,7 @@
+import numpy as np
+from scipy import stats
+from matplotlib.pyplot import figure, plot, subplot, title, xlabel, ylabel, show, clim, legend, boxplot, xticks
+
 lr_features = {
     1: ['bathrooms', 'sqft_living', 'sqft_lot', 'floors', 'condition', 'sqft_above',
         'zipcode_98001', 'zipcode_98002', 'zipcode_98003', 'zipcode_98004', 'zipcode_98005', 'zipcode_98006',
@@ -221,5 +225,57 @@ feature_std = [6.58679098e-01, 6.14975191e-01, 5.51146680e+02, 8.72036900e+03, 4
                1.10605696e-01, 1.17147497e-01, 1.21883417e-01, 5.90363441e-02, 1.47882297e-01,1.08987099e-01,
                1.20717912e-01, 1.04995559e-01, 1.11565012e-01, 8.20398058e-02, 1.23895020e-01, 1.08003708e-01]
 
-if __name__ == 'main':
-    pass
+mean_error = np.array([[3.10987528e+10], [3.00534845e+10], [3.341753674e+10], [3.23697821e+10], [3.28564822e+10]])
+lr_fs_error = np.array([[6.76999588e+09], [6.68334743e+09], [7.70783444e+09], [6.87969291e+09], [6.65896813e+09]])
+ann_error = np.array([[6.07827814e+09], [6.26691994e+09], [7.10732237e+09], [6.34139750e+09], [6.28360602e+09]])
+
+if __name__ == '__main__':
+    common_features = [i for i in lr_features[1] if i in lr_features[2] and i in lr_features[3] and i in lr_features[4]
+                       and i in lr_features[5]]
+    print('features that are on every outer fold: {0}'.format(str(common_features)))
+    print(len(common_features))
+    n_features = [len(i) for i in lr_features.values()]
+    print('number of features in each fold: {0}'.format(str(n_features)))
+    print(len(features))
+    print(len(feature_means))
+    print(len(feature_std))
+
+    print(ann_error.shape)
+
+    # Figure with everything
+    figure(figsize=(9, 6))
+    plot(range(1, mean_error.shape[0] + 1), mean_error)
+    plot(range(1, lr_fs_error.shape[0] + 1), lr_fs_error)
+    plot(range(1, ann_error.shape[0] + 1), ann_error)
+    legend(['Average', 'LR with fs', 'ANN'])
+    xlabel('Iteration')
+    ylabel('Squared error (crossvalidation)')
+    title('Models Generalization Error')
+    show()
+
+    # Boxplot to compare regressor error distributions
+    figure()
+    boxplot(np.concatenate((mean_error, lr_fs_error, ann_error), axis=1))
+    xlabel('Baseline vs LR with FS vs ANN')
+    ylabel('Cross-validation error [MSE]')
+    xticks(ticks=[1, 2, 3], labels=['Baseline', 'LR with FS', 'ANN'])
+    show()
+
+    figure()
+    boxplot(np.concatenate((lr_fs_error, ann_error), axis=1))
+    xlabel('LR with FS vs ANN')
+    ylabel('Cross-validation error [MSE]')
+    xticks(ticks=[1, 2], labels=['LR with FS', 'ANN'])
+    show()
+
+    K = 5
+    z = (lr_fs_error - ann_error)
+    zb = z.mean()
+    nu = K - 1
+    sig = (z - zb).std() / np.sqrt(K - 1)
+    alpha = 0.05
+    zL = zb + sig * stats.t.ppf(alpha / 2, nu)
+    zH = zb + sig * stats.t.ppf(1 - alpha / 2, nu)
+
+    print("zL: {0}".format(zL))
+    print("zH: {0}".format(zH))

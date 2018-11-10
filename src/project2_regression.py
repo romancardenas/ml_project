@@ -104,7 +104,15 @@ for train_index, test_index in CV.split(X):  # Outer 2-layer cross-validation lo
     LR_Params_fs.append(m.coef_)
 
     LR_Error_train_fs[k] = np.square(y_train - m.predict(X_train[:, selected_features])).sum() / y_train.shape[0]
+    y_est = m.predict(X_test[:, selected_features])
     LR_Error_test_fs[k] = np.square(y_test - m.predict(X_test[:, selected_features])).sum() / y_test.shape[0]
+
+    figure()
+    plot(y_test, y_est)
+    title('Linear regression with forward feature selection')
+    xlabel('Real values')
+    ylabel('Estimated values')
+    show()
 
     figure()
     plot(range(1, len(loss_record)), loss_record[1:])
