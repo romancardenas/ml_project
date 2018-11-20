@@ -7,22 +7,27 @@ from scipy.stats import zscore
 data_path = '../data/kc_house_data.csv'
 options = {
     'omit_columns': ['id',
-                     'view',
                      'date',
-                     'yr_renovated',
+                     'bedrooms',
+                     'bathrooms',
+                     'floors',
                      'waterfront',
-                     'yr_built',
+                     'view',
+                     'condition',
                      'grade',
+                     'sqft_above',
+                     'sqft_basement',
+                     'yr_renovated',
                      'sqft_living15',
-                     'sqft_lot15'], # TODO
+                     'sqft_lot15'],
     'binary_columns': {},
     'date_to_month': {},
-    #'one_to_k': [],  # The month, once extracted from date, will also turn to 1-out-of-K column
     'one_to_k': ['zipcode'],  # The month, once extracted from date, will also turn to 1-out-of-K column
     'non_normalized_columns': ['price']
 }
 
 # Get data from file
+#data = read_data(data_path)
 data = read_data(data_path, omit_columns=options['omit_columns'])
 # Transform 1-to-K columns
 data, new_columns_K = one_to_K(data, options['one_to_k'])
@@ -40,11 +45,11 @@ data = to_binary(data, options['binary_columns'])
 data = date_to_month(data, options['date_to_month'])
 
 # Transform 1-to-K columns
-data, new_columns_K = one_to_K(data, options['one_to_k'])
+#data, new_columns_K = one_to_K(data, options['one_to_k'])
 
 # removing outliers
 new_columns_K.extend(options['binary_columns'].values())  # Add binary columns to one-to-K columns
-outliers_to_remove = [column for column in list(data) if column not in new_columns_K]  # list of target columns
+outliers_to_remove = [column for column in list(data) if column not in new_columns_K and column != 'lat' and column != 'long']  # list of target columns
 
 # We will plot boxplots of all the data that is not binary (that is, its name is not in new_columns_K list)
 labels_aux = list()
@@ -95,4 +100,10 @@ plt.boxplot(zscore(data_aux, ddof=1), labels_aux)
 plt.xticks(range(1, len(labels_aux) + 1), labels_aux, rotation=45)
 plt.show()
 
-data.to_csv('../data/kc_house_data_clean_regression_zip.csv', index=False)
+plt.figure(figsize=(12, 9))
+for zipcode in new_columns_K:
+    aux = data.loc[data[zipcode] == 1]
+    plt.plot(aux['long'], aux['lat'], '.')
+plt.show()
+
+data.to_csv('../data/kc_house_data_project_3.csv', index=False)
