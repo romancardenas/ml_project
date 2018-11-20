@@ -27,25 +27,16 @@ options = {
 }
 
 # Get data from file
-#data = read_data(data_path)
 data = read_data(data_path, omit_columns=options['omit_columns'])
+
 # Transform 1-to-K columns
 data, new_columns_K = one_to_K(data, options['one_to_k'])
-
-plt.figure(figsize=(12, 9))
-for zipcode in new_columns_K:
-    aux = data.loc[data[zipcode] == 1]
-    plt.plot(aux['long'], aux['lat'], '.')
-plt.show()
 
 # Transform binary columns
 data = to_binary(data, options['binary_columns'])
 
 # Transform date columns to months (if apply)
 data = date_to_month(data, options['date_to_month'])
-
-# Transform 1-to-K columns
-#data, new_columns_K = one_to_K(data, options['one_to_k'])
 
 # removing outliers
 new_columns_K.extend(options['binary_columns'].values())  # Add binary columns to one-to-K columns
@@ -61,14 +52,14 @@ data_aux = data[labels_aux].values
 
 # boxplot of original non-binary data to see outliers
 plt.figure()
-plt.title('House prizing: Boxplot (original)')
+plt.title('Houses location: Boxplot (original)')
 plt.boxplot(data_aux)
 plt.xticks(range(1, len(labels_aux) + 1), labels_aux, rotation=45)
 plt.show()
 
 # boxplot of original standardized non-binary data to see more clearly outliers
 plt.figure()
-plt.title('House prizing: Boxplot (original standarized)')
+plt.title('Houses location: Boxplot (original standarized)')
 plt.boxplot(zscore(data_aux, ddof=1), labels_aux)
 plt.xticks(range(1, len(labels_aux) + 1), labels_aux, rotation=45)
 plt.show()
@@ -88,19 +79,23 @@ data_aux = data[labels_aux].values
 
 # boxplot of original non-binary data to see outliers
 plt.figure()
-plt.title('House prizing: Boxplot (without outliers)')
+plt.title('Houses location: Boxplot (without outliers)')
 plt.boxplot(data_aux)
 plt.xticks(range(1, len(labels_aux) + 1), labels_aux, rotation=45)
 plt.show()
 
 # boxplot of original standardized non-binary data to see more clearly outliers
 plt.figure()
-plt.title('House prizing: Boxplot (without outliers and standarized)')
+plt.title('Houses location: Boxplot (without outliers and standarized)')
 plt.boxplot(zscore(data_aux, ddof=1), labels_aux)
 plt.xticks(range(1, len(labels_aux) + 1), labels_aux, rotation=45)
 plt.show()
 
+# plot longitude vs latitude. Colors distinguish different zipcodes
 plt.figure(figsize=(12, 9))
+plt.title('Houses location and zipcodes')
+plt.xlabel('Longitude')
+plt.ylabel('Latitude')
 for zipcode in new_columns_K:
     aux = data.loc[data[zipcode] == 1]
     plt.plot(aux['long'], aux['lat'], '.')
