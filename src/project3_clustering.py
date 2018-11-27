@@ -5,6 +5,7 @@ from toolbox_02450 import clusterplot
 from scipy.cluster.hierarchy import linkage, fcluster, dendrogram
 from sklearn.mixture import GaussianMixture
 from sklearn import model_selection
+from toolbox_02450 import clusterval
 ###################################################
 #                   READ DATA                     #
 ###################################################
@@ -21,13 +22,14 @@ y_one_zipcode = np.empty((y.shape[0], 1))
 for column in range(C):
     aux = (column + 1) * y[:, [column]]
     y_one_zipcode += (column + 1) * y[:, [column]]
+y_one_zipcode = y_one_zipcode.ravel()
 
 print('###################################################')
 print('#                        GMM                      #')
 print('###################################################')
 
 # Range of K's to try
-KRange = range(C - 10, C + 10)  # TODO
+KRange = range(1, 5)  # TODO
 T = len(KRange)
 
 covar_type = 'full'  # you can try out 'diag' as well
@@ -93,33 +95,46 @@ plt.ylabel('latitude')
 clusterplot(X, clusterid=cls, centroids=cds, y=y_one_zipcode, covars=covs)
 plt.show()
 
+# Evaluate GMM model
+Rand_gmm, Jaccard_gmm, NMI_gmm = clusterval(y_one_zipcode, cls)
+
 print('###################################################')
 print('#             HIERARCHICAL CLUSTERING             #')
 print('###################################################')
-Method = 'average'
-Methods = ['single', 'complete', 'average', 'weighted', 'median', 'ward']
 Metric = 'euclidean'
-# for Method in Methods: TODO
-Z = linkage(X, method=Method, metric=Metric)
-
-# Compute and display clusters by thresholding the dendrogram
 Maxclust = K_optimal
-cls = fcluster(Z, criterion='maxclust', t=Maxclust)
-
-plt.figure(3, figsize=(24, 18))
-plt.title('Hierarchical clustering using {} method'.format(Method))
-plt.xlabel('longitude')
-plt.ylabel('latitude')
-# aux = X[:, [attributeNames.index('long'), attributeNames.index('lat')]]
-# aux = (aux - aux.mean(axis=0))/aux.std(axis=0)
-clusterplot(X, cls, y=y_one_zipcode)
-
-# Display dendrogram
 max_display_levels = K_optimal
-plt.figure(4, figsize=(20, 10))
-plt.title('Hierarchical clustering using {} method'.format(Method))
-dendrogram(Z, truncate_mode='lastp', p=max_display_levels)
-plt.show()
+Methods = ['single', 'complete', 'average', 'weighted', 'median', 'ward']  # We will try all these methods
+n_methods = len(Methods)
+
+# Allocate variables:
+Rand_hier = np.zeros((n_methods,))
+Jaccard_hier = np.zeros((n_methods,))
+NMI_hier = np.zeros((n_methods,))
+
+i = 0
+for Method in Methods:
+    Z = linkage(X, method=Method, metric=Metric)
+
+    # Compute and display clusters by thresholding the dendrogram
+    cls = fcluster(Z, criterion='maxclust', t=Maxclust)
+
+    plt.figure(3 + 2*i, figsize=(24, 18))
+    plt.title('Hierarchical clustering using {} method'.format(Method))
+    plt.xlabel('longitude')
+    plt.ylabel('latitude')
+    clusterplot(X, cls, y=y_one_zipcode)
+
+    # Display dendrogram
+    plt.figure(4 + 2*i, figsize=(20, 10))
+    plt.title('Hierarchical clustering using {} method'.format(Method))
+    dendrogram(Z, truncate_mode='lastp', p=max_display_levels)
+    plt.show()
+
+    # Evaluate hierarchical method
+    Rand_hier[i], Jaccard_hier[i], NMI_hier[i] = clusterval(y_one_zipcode, cls)
+    i += 1
+
 
 print('###################################################')
 print('#            MODELS QUALITY EVALUATION            #')
