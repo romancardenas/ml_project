@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
-from src.modify_data import *
+import pandas as pd
+import numpy as np
 from scipy.stats import zscore
+from scipy.linalg import svd
 
 data_path = '../data/SAheart.csv'
 
@@ -15,7 +17,6 @@ del aux
 plt.figure(1)
 plt.title('South African Heart Disease: Boxplot (original)')
 data.boxplot()
-print(len(list(data)))
 plt.xticks(range(1, len(list(data)) + 1), list(data), rotation=45)
 plt.show()
 
@@ -52,3 +53,54 @@ data = data.drop('chd', axis=1)
 data.insert(loc=0, column='chd', value=aux)
 del aux
 data.to_csv('../data/SAheart_reg.csv', index=False)
+
+
+# PCA ANALYSIS
+attributeNames = list(data.columns.values)
+attributeNames.remove('chd')
+y = data.values[:, 0]
+X = data.values[:, 1:]
+M, N = X.shape
+
+# Standardize data
+Y = (X - X.mean(axis=0)) / X.std(axis=0)
+
+# PCA by computing SVD of Y
+U, S, V = svd(Y, full_matrices=False)
+V = V.T
+
+# Compute variance explained by principal components
+rho = (S * S) / (S * S).sum()
+cum_rho = rho.cumsum()
+pca_index_90 = 0
+for i in range(len(cum_rho)):
+    if cum_rho[i] > 0.9:
+        pca_index_90 = i + 1
+        break
+print('With {0:d} PCAs you have {1:.2f}% of the information'.format(pca_index_90, cum_rho[pca_index_90] * 100))
+
+# Plot variance explained
+plt.figure(5)
+plt.plot(range(1, len(rho) + 1), rho, 'o-')
+plt.title('Variance Explained by Principal Components')
+plt.xlabel('Principal components')
+plt.ylabel('Variance explained')
+
+plt.figure(6)
+plt.plot(range(1, len(cum_rho) + 1), cum_rho, 'o-')
+plt.axhline(y=0.9, color='r', linestyle='--')
+plt.title('Cumulative Variance Explained by Principal Components')
+plt.xlabel('Principal component')
+plt.ylabel('Cumulative variance explained')
+plt.show()
+
+# Project data onto principal component space
+Z = Y @ V
+plt.figure(7)
+plt.title("Coronary Heart Disease Represented by the First two PCs")
+plt.plot(Z[y == 0, 0], Z[y == 0, 1], '.')
+plt.plot(Z[y == 1, 0], Z[y == 1, 1], '.')
+plt.legend(['Absent', 'Present'])
+plt.xlabel('PC1')
+plt.ylabel('PC2')
+plt.show()
