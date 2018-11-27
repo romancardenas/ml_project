@@ -130,7 +130,7 @@ print('###################################################')
 print('#            MODELS QUALITY EVALUATION            #')
 print('###################################################')
 # TODO
-jaccard = {'gmm': Jaccard_gmm}
+Jaccard = {'gmm': Jaccard_gmm}
 NMI = {'gmm': NMI_gmm}
 Rand = {'gmm': Rand_gmm}
 for i in range(len(Methods)):
