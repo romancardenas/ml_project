@@ -1,0 +1,9 @@
+To construct the data, seven geometric parameters of wheat kernels were measured:
+
+area A,
+perimeter P,
+compactness C = 4*pi*A/P^2,
+length of kernel,
+width of kernel,
+asymmetry coefficient
+length of kernel groove.

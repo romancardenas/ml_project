@@ -20,11 +20,18 @@ N, M = X.shape
 C = len(classNames)
 X_std = (X - X.mean(axis=0)) / X.std(axis=0)
 
+Y = (X - X.mean(axis=0))
+# PCA by computing SVD of Y
+U, S, V = svd(Y, full_matrices=False)
+V = V.T
+X_projected = Y @ V
+X = X_projected[:, :2]
+
 print('###################################################')
 print('#                        GMM                      #')
 print('###################################################')
 # Range of K's to try
-KRange = range(1, 10)  # TODO
+KRange = range(1, 10)
 T = len(KRange)
 
 covar_type = 'full'  # you can try out 'diag' as well
@@ -78,6 +85,16 @@ print('The optimal number of clusters, according to GMM cross-validation, is {}'
 # Fit best Gaussian mixture model to X and plot result
 gmm = GaussianMixture(n_components=K_optimal, covariance_type=covar_type, n_init=reps).fit(X)
 cls = gmm.predict(X)
+# extract cluster labels
+cds = gmm.means_
+# extract cluster centroids (means of gaussians)
+covs = gmm.covariances_
+plt.figure(figsize=(12, 9))
+clusterplot(X, clusterid=cls, centroids=cds, y=y, covars=covs)
+plt.title('Gaussian Mixture Model using {} clusters'.format(K_optimal))
+plt.xlabel('PC 1')
+plt.ylabel('PC 2')
+plt.show()
 # Evaluate GMM model
 Rand_gmm, Jaccard_gmm, NMI_gmm = clusterval(y, cls)
 

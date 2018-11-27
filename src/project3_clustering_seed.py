@@ -11,16 +11,14 @@ from scipy.linalg import svd
 ###################################################
 #                   READ DATA                     #
 ###################################################
-data = pd.read_csv('../data/SAheart_reg.csv')
+data = pd.read_csv('../data/seed_data_reg.csv')
 X = data.values[:, 1:]
 y = data.values[:, [0]].ravel()
 attributeNames = list(data)[1:]
 classNames = list(data)[0]
 N, M = X.shape
 C = len(classNames)
-X_std = (X - X.mean(axis=0)) / X.std(axis=0)
 
-#Y = (X - X.mean(axis=0)) / X.std(axis=0)
 Y = (X - X.mean(axis=0))
 # PCA by computing SVD of Y
 U, S, V = svd(Y, full_matrices=False)
@@ -91,7 +89,7 @@ cls = gmm.predict(X)
 cds = gmm.means_
 # extract cluster centroids (means of gaussians)
 covs = gmm.covariances_
-plt.figure(2, figsize=(24, 18))
+plt.figure(2, figsize=(12, 9))
 plt.title('Gaussian Mixture Model using {} clusters'.format(K_optimal))
 plt.xlabel('PC 1')
 plt.ylabel('PC 2')
@@ -122,14 +120,14 @@ for Method in Methods:
     # Compute and display clusters by thresholding the dendrogram
     cls = fcluster(Z, criterion='maxclust', t=Maxclust)
 
-    plt.figure(3 + 2*i, figsize=(24, 18))
+    plt.figure(3 + 2*i, figsize=(12, 9))
     plt.title('Hierarchical clustering using {} method'.format(Method))
     plt.xlabel('PC 1')
     plt.ylabel('PC 2')
     clusterplot(X, cls, y=y)
 
     # Display dendrogram
-    plt.figure(4 + 2*i, figsize=(20, 10))
+    plt.figure(4 + 2*i, figsize=(15, 8))
     plt.title('Hierarchical clustering using {} method'.format(Method))
     dendrogram(Z, truncate_mode='lastp', p=max_display_levels)
     plt.show()
@@ -142,4 +140,18 @@ for Method in Methods:
 print('###################################################')
 print('#            MODELS QUALITY EVALUATION            #')
 print('###################################################')
-# TODO
+Jaccard = {'gmm': Jaccard_gmm}
+NMI = {'gmm': NMI_gmm}
+Rand = {'gmm': Rand_gmm}
+for i in range(len(Methods)):
+    Jaccard[Methods[i]] = Jaccard_hier[i]
+    NMI[Methods[i]] = NMI_hier[i]
+    Rand[Methods[i]] = Rand_hier[i]
+pass
+
+print('Jaccard: {}'.format(str(Jaccard)))
+print('NMI: {}'.format(str(NMI)))
+print('Rand: {}'.format(str(Rand)))
+print('###################################################')
+print('GMM centroids: {}'.format(str(cds)))
+print('GMM covariances: {}'.format(str(covs)))
