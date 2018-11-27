@@ -28,7 +28,7 @@ plt.xticks(range(1, len(list(data)) + 1), list(data), rotation=45)
 plt.show()
 
 # We will remove outliers ONLY if the column in question is not binary
-std = 1.5
+std = 2
 data_mean = data.mean()
 data_std = data.std()
 for column in list(data):
@@ -63,7 +63,8 @@ X = data.values[:, 1:]
 M, N = X.shape
 
 # Standardize data
-Y = (X - X.mean(axis=0)) / X.std(axis=0)
+#Y = (X - X.mean(axis=0)) / X.std(axis=0)
+Y = (X - X.mean(axis=0))
 
 # PCA by computing SVD of Y
 U, S, V = svd(Y, full_matrices=False)
