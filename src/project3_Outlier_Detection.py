@@ -18,7 +18,8 @@ from toolbox_02450 import gausKernelDensity
 from sklearn.neighbors import NearestNeighbors
 
 # Load data file and extract variables of interest
-data = pd.read_csv('../data/kc_house_data_project_3.csv')
+#data = pd.read_csv('../data/kc_house_data_project_3.csv')
+data = pd.read_csv('/Users/sebastian/Desktop/test.csv')
 X = data.values[:5000, :6]
 
 scaler = Normalizer().fit(X)
