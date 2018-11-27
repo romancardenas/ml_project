@@ -46,4 +46,9 @@ plt.title('South African Heart Disease: Boxplot (without outliers and standarize
 plt.boxplot(zscore(data, ddof=1), list(data))
 plt.xticks(range(1, len(list(data)) + 1), list(data), rotation=45)
 plt.show()
+
+aux = data[['chd']]
+data = data.drop('chd', axis=1)
+data.insert(loc=0, column='chd', value=aux)
+del aux
 data.to_csv('../data/SAheart_reg.csv', index=False)
