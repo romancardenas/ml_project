@@ -40,7 +40,7 @@ data = date_to_month(data, options['date_to_month'])
 
 # removing outliers
 new_columns_K.extend(options['binary_columns'].values())  # Add binary columns to one-to-K columns
-outliers_to_remove = [column for column in list(data) if column not in new_columns_K and column != 'lat' and column != 'long']  # list of target columns
+outliers_to_remove = [column for column in list(data) if column not in new_columns_K]  # list of target columns
 
 # We will plot boxplots of all the data that is not binary (that is, its name is not in new_columns_K list)
 labels_aux = list()
@@ -101,4 +101,4 @@ for zipcode in new_columns_K:
     plt.plot(aux['long'], aux['lat'], '.')
 plt.show()
 
-data.to_csv('../data/kc_house_data_project_3.csv', index=False)
+data.to_csv('../data/kc_house_data_project_3_reg.csv', index=False)
