@@ -53,13 +53,19 @@ def divide_data(df, labels, num_divides):
     return df * 1
 
 
-data = pd.read_csv('../data/Seed_Data.csv',index_col = 0)
-data = divide_data(data, list(data),10)
 
+
+data = pd.read_csv('../data/Seed_Data.csv',index_col = 0)
+
+attributeNames = list(data)
+attributeNames.remove('target')
+data = divide_data(data, attributeNames,5)
+data = divide_data(data, ['target'],3)
 
 
 
 attributeNames = list(data)
+
 
 
 
@@ -97,6 +103,6 @@ def print_apriori_rules(rules):
 
 T = mat2transactions(X,labels=attributeNames)
 #T = mat2transactions(Xbin,labels=attributeNamesBin)
-rules = apriori(T, min_support=0.05, min_confidence=.8)
+rules = apriori(T, min_support=0.2, min_confidence=.8)
 print_apriori_rules(rules)
 
